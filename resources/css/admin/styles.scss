@@ -234,6 +234,13 @@ input[type='radio'], input[type='submit'], button, .conf-step__header, select {
   margin-top: 35px;
 }
 
+.conf-step__paragraph2 {
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: $black;
+  margin-bottom: 7px;
+}
+
 .conf-step__list {
   list-style: none;
   font-size: 1.6rem;

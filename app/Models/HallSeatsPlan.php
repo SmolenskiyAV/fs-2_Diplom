@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class HallSeatsPlan extends Model
+class HallSeatsPlan extends Model   // МОДЕЛЬ таблицы "Схема зала" (план мест. для каждого зала отдельная таблица)
 {
     use HasFactory;
 
@@ -17,7 +17,7 @@ class HallSeatsPlan extends Model
 	{
 		$name = $hall_name . '_plane';
 
-        HallSeatsPlan::tableId($name);    // привязка модели к динамически создаваемой таблице c постфиксом "_plane" в БД
+        HallSeatsPlan::tableId($name);    // привязка модели к динамически создаваемой таблице c постфиксом "_plane" в имени
 
         return (new HallSeatsPlan());
         

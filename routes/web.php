@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TodoController;
-
+use App\Models\Film;
 use App\Models\Hall;
 
 Route::get('/', function () {
@@ -14,7 +14,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/admin', function () {
-    return view('/layouts/app_admin', ['data' => Hall::paginate()]);
+    return view('/layouts/app_admin', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
 })->name('admin_main');
 
 Route::get('/todo/list', [TodoController::class, 'show'])->name('list');
@@ -79,7 +79,18 @@ route::name('user.')->group(function () {
 
 Route::post('/addHall', [TodoController::class, 'addHall'])->name('addHall');
 Route::get('/delHall', [TodoController::class, 'delHall'])->name('delHall');
+
 Route::post('/sizeHall', [TodoController::class, 'sizeHall'])->name('sizeHall');
 Route::post('/planeHall', [TodoController::class, 'planeHall'])->name('planeHall');
+
 Route::post('/billingHall', [TodoController::class, 'billingHall'])->name('billingHall');
 Route::get('/btnPush/{hall_name}/section/{scroll_to_section}', [TodoController::class, 'btnPush'])->name('btnPush');
+
+Route::post('/addFilm', [TodoController::class, 'addFilm'])->name('addFilm');
+Route::get('/delFilm', [TodoController::class, 'delFilm'])->name('delFilm');
+
+Route::post('/addSessionsPlan', [TodoController::class, 'addSessionsPlan'])->name('addSessionsPlan');
+Route::get('/delSessionsPlan', [TodoController::class, 'delSessionsPlan'])->name('delSessionsPlan');
+
+Route::post('/addFilmSessions', [TodoController::class, 'addFilmSessions'])->name('addFilmSessions');
+//Route::get('/delFilmSession', [TodoController::class, 'delFilmSession'])->name('delFilmSession');

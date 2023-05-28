@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('vip_seats') ->default(0);                      // количество VIP-мест
             $table->integer('usual_seats') ->default(64);               // количество обычных мест
             $table->integer('locked_seats') ->default(16);                   // количество заблокированных мест
+            $table->integer('session_planes') ->default(0);             // количество действующих планов сеансов для данного зала
             $table->boolean('active')->default(false);                  // открыт/закрыт для продажи билетов 
             $table->string('admin_updater', 100) ->nullable(); 
             $table->timestamps();

@@ -7,13 +7,17 @@ use App\Models\Hall;
 use Illuminate\Http\Request;
 use App\Http\Requests\CreateRequest;
 use App\Http\Requests\CreateHallRequest;
+use App\Http\Requests\CreateFilmRequest;
+use App\Models\Film;
 use App\Models\HallBilling;
 use App\Models\HallSeatsPlan;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 use App\Models\HallSeatsPlaneCreate;
+use App\Models\HallSessionsPlan;
+use App\Models\HallSessionsPlaneCreate;
 
-//use GuzzleHttp\Promise\Create;
+use Illuminate\Support\Facades\Storage;
 
 class TodoController extends Controller
 {
@@ -33,6 +37,8 @@ class TodoController extends Controller
 
         return redirect()->route('home')->with('success', 'Новая задача успешно добавлена');
     }
+
+
 
     public function addHall(CreateHallRequest $request) // ДОБАВИТЬ ЗАЛ
     {
@@ -64,10 +70,12 @@ class TodoController extends Controller
             $hall->hallSeatsPlan()->save($plane);      // создание дефолтной записи в зависимой таблице "План мест в зале"
             }
                   
-        }
-       
-        return redirect()->route('admin_main', ['data' => Hall::paginate()])->with('success', 'Новый зал успешно добавлен');
+        }    
+
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Новый зал успешно добавлен');
     }
+
+
 
     public function delHall(Request $request)   //  УДАЛИТЬ ЗАЛ
     {
@@ -75,9 +83,11 @@ class TodoController extends Controller
         Hall::where('hall_name', $hall_name)->delete(); // удаление записи в таблице "Зал"
 
         Schema::drop($hall_name . '_plane');            // удаление зависимой таблицы "План мест в зале"
-                                                
-        return redirect()->route('admin_main', ['data' => Hall::paginate()])->with('success', 'Новый зал успешно удалён');
+                                            
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Зал ' . $hall_name . ' успешно удалён');
     }
+
+
 
     public function sizeHall(Request $request)   //  ЗАДАТЬ РАЗМЕР ЗАЛА
     {
@@ -87,7 +97,7 @@ class TodoController extends Controller
         $chair_standart_default = $rows * $seats_per_row;
 
         if (($chair_standart_default === 0) || ($rows > 40) || ($seats_per_row > 50)) {
-            return redirect()->route('admin_main', ['data' => Hall::paginate()]) ->with('baddata', 'Новый размер зала ' . $hall_name . ' не может быть определён! Неверные параметры.');
+            return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]) ->with('baddata', 'Новый размер зала ' . $hall_name . ' не может быть определён! Неверные параметры.');
         }
 
         DB::table('halls')->where('hall_name', $hall_name)->update([
@@ -111,12 +121,13 @@ class TodoController extends Controller
             $plane->type = 1;
 
             $hall->hallSeatsPlan()->save($plane);      // создание дефолтной записи в зависимой таблице "План мест в зале"
-            }
-                  
+            }                  
         }        
 
-        return redirect()->route('admin_main', ['data' => Hall::paginate(), 'radioBtnPushed' => $hall_name]) ->with('success', 'Размер зала ' . $hall_name . ' успешно изменён');
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'radioBtnPushed' => $hall_name, 'dataFilms' => Film::paginate()]) ->with('success', 'Размер зала ' . $hall_name . ' успешно изменён');
     }
+
+
 
     public function planeHall(Request $request)   //  ЗАДАТЬ ПЛАНИРОВКУ ЗАЛА
     {
@@ -161,8 +172,10 @@ class TodoController extends Controller
             'locked_seats' =>$locked_seats
         ]);              
                                                       
-        return redirect()->route('admin_main', ['data' => Hall::paginate(), 'radioBtnPushed' => $hall_name])->with('success', 'План зала ' . $hall_name . ' успешно изменён');
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'radioBtnPushed' => $hall_name, 'dataFilms' => Film::paginate()])->with('success', 'Схема зала ' . $hall_name . ' успешно изменена');
     }
+
+
 
     public function billingHall(Request $request)   //  УСТАНОВИТЬ ЦЕНЫ ДЛЯ ТИПОВ КРЕСЕЛ
     {
@@ -175,13 +188,161 @@ class TodoController extends Controller
             'usual_cost' =>$usual_cost
         ]);              
                                                       
-        return redirect()->route('admin_main', ['data' => Hall::paginate(), 'radioBtnPushed' => $hall_name])->with('success', 'Цены на места в зале ' . $hall_name . ' успешно изменены');
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'radioBtnPushed' => $hall_name, 'dataFilms' => Film::paginate()])->with('success', 'Цены на места в зале ' . $hall_name . ' успешно изменены');
     }
 
     public function btnPush($pushedBtn, $section)   // НАВИГАЦИЯ ПО РАДИО-КНОПКАМ
     {   // параметр $section определяет, куда будет перемещён скролл страницы после нажатия одной из радиокнопок
-        return view('/layouts/app_admin', ['data' => Hall::paginate(), 'radioBtnPushed' => $pushedBtn, 'section' => $section]);
+        return view('/layouts/app_admin', ['dataHalls' => Hall::paginate(), 'radioBtnPushed' => $pushedBtn, 'section' => $section, 'dataFilms' => Film::paginate()]);
     }
+
+    public function addFilm(CreateFilmRequest $request) // ДОБАВИТЬ ФИЛЬМ
+    {
+        //dd($request->input('film_name'));
+        $film_name = $request->input('film_name');
+        $duration = $request->input('film_duration');        
+        $extension = $request->poster->extension(); // получить расширение файла
+        //dd($extension);
+        $poster_name = $film_name . '_poster';
+        $poster_name = preg_replace('/[[:punct:]]|[\s\s+]/', '_', $poster_name);  //заменяем пробелы и спецсимволы из имени постера на "_";
+        if($request->isMethod('post')) {
+
+            if($request->hasFile('poster')) {
+                $file = $request->file('poster');
+                $file->move(public_path() . '/storage/images/films',"$poster_name.$extension");
+            }
+        }       
+
+        $film = new Film();
+        $film->film_duration = (int) $duration;
+        $film->film_name = $film_name;
+        $film->poster_path = '/storage/images/films/' . "$poster_name.$extension";
+        
+        $film->save();                          // создание записи в таблице "фильм"
+        session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"        
+           
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Новый фильм успешно добавлен');
+    }
+
+
+
+    public function delFilm(Request $request)   //  УДАЛИТЬ ФИЛЬМ
+    {
+        $film_name = $request->input('film_name');
+                
+        $poster_path = public_path() . DB::table('films')->where('film_name', $film_name)->value('poster_path');
+        
+        unlink($poster_path);
+        //Storage::disk('local')->delete($poster_path);                  // удаление постера, относящегося к данному фильму (не работает,сцуко..) :/
+
+        Film::where('film_name', $film_name)->delete(); // удаление записи в таблице "Фильм"
+        
+        session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"    
+                                            
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Фильм "' . $film_name . '" успешно удалён');
+    }
+
+
+
+    public function addSessionsPlan(Request $request) // ДОБАВИТЬ ПЛАН СЕАНСОВ НА КОНКРЕТНЫЙ ДЕНЬ
+    {
+        //dd($request->input('sessions_time'));
+        $hall_name = $request->input('hall_name');
+        $sessions_date = $request->input('sessions_date');
+
+        session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"
+
+        if (Schema::hasTable($hall_name . '*' . $sessions_date)) {
+
+            return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]) ->with('baddata', 'План сеансов зала ' . $hall_name . ' на ' . $sessions_date . ' уже существует!');
+
+        } else {
+
+            $sessions_plane = new HallSessionsPlaneCreate();
+            $sessions_plane->up($hall_name . '*' . $sessions_date);      // создание зависимой таблицы "План сеансов на день"
+
+            $session_planes = (int) (DB::table('halls')->where('hall_name', $hall_name)->value('session_planes')) + 1;
+            
+            DB::table('halls')->where('hall_name', $hall_name)->update([
+                'session_planes' => $session_planes   // увеличиваем количество действующих планов сеансов для данного зала на 1 
+            ]);
+        }
+        
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Новый план сеансов зала' . '"'. $hall_name .'"' . ' на ' . $sessions_date . ' успешно добавлен');
+    }
+
+
+
+    public function delSessionsPlan(Request $request) // УДАЛИТЬ ПЛАН СЕАНСОВ НА КОНКРЕТНЫЙ ДЕНЬ
+    {
+        $full_name = $request->input('fullPlanedName');
+        $hall_name = $request->input('hallPlanedName');
+        $sessions_date  = $request->input('hallPlanedDate');
+        
+        $allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");    // список всех таблиц БД
+        
+        foreach($allTables as $el) {
+
+            if (strpos($el->name, $full_name) === 0){
+                Schema::drop($el->name);                    // удаление зависимой таблицы "План сеансов на день" и зависимых от неё таблиц "Билеты на сеанс" (относящихся к данному залу на данный день)
+            }
+        }
+        
+        $session_planes = (int) (DB::table('halls')->where('hall_name', $hall_name)->value('session_planes')) - 1;
+        DB::table('halls')->where('hall_name', $hall_name)->update([
+            'session_planes' => $session_planes   // уменьшаем количество действующих планов сеансов для данного зала на 1 
+        ]);
+
+        session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"
+
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'План сеансов зала '. '"'. $hall_name .'"' . ' на ' . $sessions_date .' успешно удалён из сетки сеансов');
+    }  
+
+
+
+    public function addFilmSessions(Request $request) // ДОБАВИТЬ НОВЫЙ СЕАНС В ПЛАН СЕАНСОВ
+    {
+        /*
+        $allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");    // список всех таблиц БД
+        $targetTables = [];
+
+        foreach($allTables as $el) {
+
+            if (preg_match("/(_plane)/", $el->name)){
+                $targetTables[] = $el->name;
+            }
+
+        }
+        */
+        
+        $hall_name = $request->input('hall_planed_name');
+        $session_date = $request->input('session_date');
+        $film_name = $request->input('film_name');
+        $session_time = $request->input('session_time');
+        dd($request->input('session_time'));
+        session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"
+
+                   $sessions_plane = new HallSessionsPlaneCreate();
+            $sessions_plane->up($hall_name . '*' . $session_date);      // создание зависимой таблицы "План сеансов на день"
+
+            $session_planes = (int) (DB::table('halls')->where('hall_name', $hall_name)->value('session_planes')) + 1;
+            
+            DB::table('halls')->where('hall_name', $hall_name)->update([
+                'session_planes' => $session_planes   // увеличиваем количество действующих планов сеансов для данного зала на 1 
+            ]);
+       
+        
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Новый план сеансов зала' . '"'. $hall_name .'"' . ' на ' . $session_date . ' успешно добавлен');
+    }
+
+
+
+
+
+
+
+
+
 
     public function show()
     {

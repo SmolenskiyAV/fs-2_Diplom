@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class HallBilling extends Model
+class HallBilling extends Model // МОДЕЛЬ таблицы "Цены на места в зале"
 {
     use HasFactory;
 

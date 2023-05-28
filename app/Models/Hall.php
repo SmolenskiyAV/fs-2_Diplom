@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 
-class Hall extends Model
+class Hall extends Model    // МОДЕЛЬ таблицы "Залы"
 {
     use HasFactory;
 
@@ -22,13 +22,9 @@ class Hall extends Model
         return $this->hasOne(HallBilling::class); // отношение "Один-ко-Одному" (Зал -> Цены_на_места_в_зале)
     }
 
-    public function sessions()
+    public function hallSessionsPlan()
     {
-        return $this->belongsToMany(FilmSession::class);    // отношение "Многие-ко-Многим" (Залы -> Сеансы_фильмов)
+        return $this->hasMany(HallSessionsPlan::class);    // отношение "Один-ко-Многим" (Зал -> План_сеансов_на_день)
     }
 
-    public function films()
-    {
-        return $this->belongsToMany(Film::class);   // отношение "Многие-ко-Многим" (Залы -> Фильмы)
-    }
 }
