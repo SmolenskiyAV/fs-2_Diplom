@@ -92,5 +92,5 @@ Route::get('/delFilm', [TodoController::class, 'delFilm'])->name('delFilm');
 Route::post('/addSessionsPlan', [TodoController::class, 'addSessionsPlan'])->name('addSessionsPlan');
 Route::get('/delSessionsPlan', [TodoController::class, 'delSessionsPlan'])->name('delSessionsPlan');
 
-Route::post('/addFilmSessions', [TodoController::class, 'addFilmSessions'])->name('addFilmSessions');
-//Route::get('/delFilmSession', [TodoController::class, 'delFilmSession'])->name('delFilmSession');
+Route::post('/infoFilmSession', [TodoController::class, 'infoFilmSession'])->name('infoFilmSession');
+Route::post('/changeFilmSession', [TodoController::class, 'changeFilmSession'])->name('changeFilmSession');

@@ -18,7 +18,7 @@ class HallSessionsPlaneCreate // класс создания/удаления т
                 ->references('id')->on('halls');
             
             $table->string('film_name')->nullable(false);
-            $table->date('film_tickets')->nullable(false);  // имя таблицы с перечнем купленных/проданных билетов на данный сеанс этого зала
+            $table->string('film_tickets')->nullable(false);  // имя таблицы с перечнем купленных/проданных билетов на данный сеанс этого зала
             $table->time('film_start')->nullable(false);
             $table->integer('film_duration')->nullable(false);
             $table->string('admin_updater', 100) ->nullable();

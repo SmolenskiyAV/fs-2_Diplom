@@ -30,6 +30,7 @@
         $planedHallDate = '';
         $randomID = '';
         $status_color = 'black';
+        $posterBackground_path = '';
         
         function generateRandomString($length = 10) {
             $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -125,7 +126,7 @@
                 @if ($radioBtnPushed === '')
                     @foreach($dataHalls as $el)
                         @if ($loop->first)
-                            <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" checked><span class="conf-step__selector">{{$el->hall_name}}</span></a></li>
+                            <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>
                             @php
                                 $hall_name_cfg = $el->hall_name;
                                 $hall_rows_cfg = $el->rows;
@@ -133,7 +134,7 @@
                             @endphp
                             @continue
                         @endif
-                        <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}"><span class="conf-step__selector">{{$el->hall_name}}</span></a></li>        
+                        <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>        
                     @endforeach
                 @else                    
                     @foreach($dataHalls as $el)
@@ -147,7 +148,7 @@
                                     });
                                 </script>
                             @endif
-                            <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" checked><span class="conf-step__selector">{{$el->hall_name}}</span></a></li>
+                            <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>
                             @php
                                 $hall_name_cfg = $radioBtnPushed;
                                 $hall_rows_cfg = $el->rows;
@@ -155,7 +156,7 @@
                             @endphp
                             @continue
                         @endif
-                        <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}"><span class="conf-step__selector">{{$el->hall_name}}</span></a></li>        
+                        <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>        
                     @endforeach
                 @endif
             </ul>
@@ -240,10 +241,10 @@
                 @if ($radioBtnPushed === '')
                     @foreach($dataHalls as $el)
                         @if ($loop->first)
-                            <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" checked><span class="conf-step__selector">{{$el->hall_name}}</span></a></li>
+                            <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>
                             @continue
                         @endif
-                        <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}"><span class="conf-step__selector">{{$el->hall_name}}</span></a></li>        
+                        <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>        
                     @endforeach
                 @else                    
                     @foreach($dataHalls as $el)
@@ -257,10 +258,10 @@
                                     });
                                 </script>
                             @endif
-                            <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" checked><span class="conf-step__selector">{{$el->hall_name}}</span></a></li>
+                            <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>
                             @continue
                         @endif
-                        <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}"><span class="conf-step__selector">{{$el->hall_name}}</span></a></li>        
+                        <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>        
                     @endforeach
                 @endif
             </ul>
@@ -342,16 +343,15 @@
                     if (preg_match("/.+(\*).+/", $el->name)){
                         $sessionsPlanTables[] = $el->name;
                     }
-                    
                 }
             @endphp
 
-            <div class="conf-step__seances"> 
+            <div class="conf-step__seances" id="Seances_Plans"> 
                 @foreach($sessionsPlanTables as $el1)
                     @php
-                        $temporal_array = explode("*" , $el1);
-                        $planedHallName = current($temporal_array);
-                        $planedHallDate = end($temporal_array);
+                        $temporal_array1 = explode("*" , $el1);
+                        $planedHallName = current($temporal_array1);
+                        $planedHallDate = end($temporal_array1);
                         $filmSessions = DB::table($el1)->get();
                         $hallStatus = DB::table('halls')->where('hall_name', $planedHallName)->value('active');
                         if ($hallStatus) {
@@ -363,7 +363,7 @@
                     @endphp
                     <div class="conf-step__seances-hall">
                         <div style="display: flex;">
-                            <span href="#" style="text-decoration: none; color: black; margin-right: 5px"><h3 class="conf-step__seances-title" style="cursor:pointer">{{ $planedHallName }}</h3><small style="cursor:default">{{ $planedHallDate }}</small></span>
+                            <span href="#" style="text-decoration: none; color: black; margin-right: 5px"><h3 class="conf-step__seances-title" name="addfilmsessionbtn" style="cursor:pointer">{{ $planedHallName }}</h3><small style="cursor:default">{{ $planedHallDate }}</small></span>
                             <span name="statusMarker" data-color="{{ $status_color }}" style="font-size: 200%; margin-right: 10px; cursor: pointer;">&#36;</span>
                             <button class="conf-step__button conf-step__button-trash" data-planedhallname="{{ $planedHallName }}" data-planedhalldate="{{ $planedHallDate }}" data-fullplanedname="{{ $el1 }}"></button>                        
                         </div>
@@ -373,21 +373,24 @@
                                
                                 @php
                                     $filmSessionName = $el2->film_name;
-                                    $posterBackground_path = DB::table('films')->where('file_name', $filmSessionName)->value('poster_path');
+                                    foreach($dataFilms as $el) {
+                                        if($el->film_name == $filmSessionName) $posterBackground_path = $el->poster_path;
+                                    }
                                     $filmSessionStart = $el2->film_start;
+                                    $temporal_array2 = explode(":" , $filmSessionStart);
                                     $filmSessionDuration = $el2->film_duration;
                                     $filmSessionTickets = $el2->film_tickets;
-
-                                    $hours = $filmSessionStart->format('H');
-                                    $minutes = $filmSessionStart->format('i');
-                                    $left = ((int) $hours * 60) + ((int) $minutes * 0.5);
-                                    $width = (int) $filmSessionDuration * 0.5;
-                                    $stop_pixel = $left + $width;
+                                    $width = ((int) $filmSessionDuration) * 0.5;
+                                    $hours = (int) current($temporal_array2);
+                                    $minutes = (int) end($temporal_array2);
+                                    $left = floor((((int) $hours * 60) + (int) $minutes) * 0.5);
+                                    $stop_pixel = ceil($left + $width);                                                                   
                                 @endphp
 
-                                <div class="conf-step__seances-movie" name="filmSession" data-tickets="{{ $filmSessionTickets }}" data-startpixel="{{ $left }}" data-stoppixel="{{ $stop_pixel }}" style="background-color: rgb(133, 255, 137); cursor: pointer;">
-                                    <img class="conf-step__movie-poster" style="width: 100%; height: 100%; top: 0; left: 0; position: absolute;" alt="poster" src={{asset("$posterBackground_path")}}>    
-                                    <!--<p class="conf-step__seances-movie-title">{{ $filmSessionName }}</p>-->
+                                <div class="conf-step__seances-movie" name="filmSession" data-planename="{{ $el1 }}" data-tickets="{{ $filmSessionTickets }}" data-startpixel="{{ $left }}" data-stoppixel="{{ $stop_pixel }}" data-mutator="stored" style="background-color: rgb(133, 255, 137); cursor: pointer;">
+                                    <fieldset title="{{ $filmSessionName }}">
+                                        <img class="conf-step__movie-poster" style="width: 100%; height: 100%; top: 0; left: 0; position: absolute;" alt="poster" src={{asset("$posterBackground_path")}}>
+                                    </fieldset>      
                                     <p class="conf-step__seances-movie-start">{{ $filmSessionStart }}</p>
                                 </div>
                             @endforeach                           
@@ -397,7 +400,7 @@
                 
                 <script>// вынужден использовать эту шнягу, т.к. прямая инжекция чрз двойные фиг.скобки от php в style="" не работает, блинн :-/
                             const HallPlanesMarkers = document.querySelectorAll('span[name="statusMarker"]');
-                            const FilmSessions = document.querySelectorAll('span[name="filmSession"]');                          
+                            const FilmSessions = document.querySelectorAll('div[name="filmSession"]');                          
                             if (HallPlanesMarkers) {
                                 let color = '';
                                 for (let j = 0; j < HallPlanesMarkers.length; j++){  // раскрашиваем маркер "$" каждого Плана сеансов
@@ -405,21 +408,22 @@
                                     HallPlanesMarkers[j].style.color = color;                                  
                                 }
                             }
+                            console.log('FilmSessions is: ', FilmSessions);
                             if (FilmSessions) {
                                 let startpixel = '';
                                 let width = '';
-                                for (let j = 0; j < FilmSessions.length; j++){            // смещаем каждый сеанс внутри суточного плана
-                                    startpixel = FilmSessions[j].dataset.startpixel;      // в зависимости от установленного начального времени 
+                                for (let j = 0; j < FilmSessions.length; j++){            
+                                    startpixel = FilmSessions[j].dataset.startpixel;
                                     width = FilmSessions[j].dataset.stoppixel - startpixel;
-                                    FilmSessions[j].style.left = `${startpixel}px`;
-                                    FilmSessions[j].style.width = `${width}px`;          // задаём ширину блока в зависимости от продолжительности сеанса                       
+                                    FilmSessions[j].style.left = `${startpixel}px`;         // в зависимости от установленного начального времени смещаем каждый сеанс внутри суточного плана
+                                    FilmSessions[j].style.width = `${width}px`;             // задаём ширину блока div в зависимости от продолжительности сеанса                                                                                                                                                       
                                 }
                             }
                 </script>
 
             </div>
 
-            <div class="conf-step__seances">                
+            <!--<div class="conf-step__seances">                
                 <div class="conf-step__seances-hall">                    
                     <div style="display: flex;">
                         <span style="text-decoration: none; color: black; margin-right: 5px"><h3 class="conf-step__seances-title" style="cursor:pointer">Зал 1</h3><small style="cursor:default">2023-06-1</small></span>
@@ -428,8 +432,10 @@
                     </div>
                     <div class="conf-step__seances-timeline">
                         <div class="conf-step__seances-movie" style="width: 60px; background-color: rgb(133, 255, 137); left: 0px; cursor: pointer;">
-                            <!--<p class="conf-step__seances-movie-title" style="font-size: 90%;">Миссия выполнима</p>-->
-                            <img class="conf-step__movie-poster" style="width: 100%; height: 100%; top: 0; left: 0; position: absolute;" alt="poster" src={{asset("storage/images/films/Джун_камикадзе_poster.jpg")}}>
+                            <!--<p class="conf-step__seances-movie-title" style="font-size: 90%;">Миссия выполнима</p>
+                            <fieldset title="Миссия выполнима">
+                                <img class="conf-step__movie-poster" style="width: 100%; height: 100%; top: 0; left: 0; position: absolute;" alt="poster" src={{asset("storage/images/films/Джун_камикадзе_poster.jpg")}}>
+                            </fieldset>
                             <p class="conf-step__seances-movie-start">00:00</p>
                         </div>
                         <div class="conf-step__seances-movie" style="width: 60px; background-color: rgb(133, 255, 137); left: 360px;">
@@ -452,15 +458,17 @@
                         <!--<div class="conf-step__seances-movie" style="width: 60px; background-color: rgb(133, 255, 137); left: 660px;">
                             <p class="conf-step__seances-movie-title">Миссия выполнима</p>
                             <p class="conf-step__seances-movie-start">22:00</p>
-                        </div>-->
+                        </div>
                     </div>
                 </div>
-            </div>
+            </div>-->
 
-            <fieldset class="conf-step__buttons text-center">
+            <form action="{{route('changeFilmSession')}}" method="post" enctype="multipart/form-data" accept-charset="utf-8" name="operate_all_plans" class="conf-step__buttons text-center">
+                @csrf
                 <button class="conf-step__button conf-step__button-regular">Отмена</button>
+                <input type="hidden" name="sessionsarray" value="">
                 <input type="submit" value="Сохранить" class="conf-step__button conf-step__button-accent">
-            </fieldset>
+            </form>
         </div>
 
         <div class="popup" id="Films_Add">
@@ -604,22 +612,66 @@
                             <label class="conf-step__label conf-step__label-fullsize" for="film_name" style="font-size: 150%; margin-top: 20px">
                                 Название фильма                                
                             </label>
+                            @php
+                                $array_parameters = [];
+                                class Parameters
+	                            {           
+		                            public $film_name;
+		                            public $film_duration;
+                                    public $poster_path;
+	                            }
+                            @endphp
                             <select class="conf-step__inputв" name="film_name">
                                 @foreach($dataFilms as $el)
                                     <option value="{{ $el->film_name }}">{{ $el->film_name }}</option>
+                                    @php
+                                        $params = new Parameters;
+                                        $params->film_name = $el->film_name;
+                                        $params->film_duration = $el->film_duration;
+                                        $params->poster_path = $el->poster_path;
+                                        array_push($array_parameters, $params);                                        
+                                    @endphp
                                 @endforeach
                             </select>
-                            <input type="hidden" name="session_date" value="">
-                            <input type="hidden" name="hall_planed_name" value="">
+                            <input type="hidden" name="film_duration" value="">
                             <label class="conf-step__label conf-step__label-fullsize" for="session_time" style="font-size: 150%; margin-top: 10px">
                                 Время начала сеанса:
                                 <input class="conf-step__inputв" type="time" name="session_time" required>
-                            </label>                       
+                            </label> 
+                            <input type="hidden" name="json_parameters" value="{{ json_encode($array_parameters) }}">                      
                             <div class="conf-step__buttons text-center">
                                 <button type="submit" value="Добавить сеанс" class="conf-step__button conf-step__button-accent">Добавить сеанс</button>
                                 <button class="conf-step__button conf-step__button-regular">Отменить</button>            
                             </div>
                             <span name="popupWarning1" style="display: none; color: red; margin-top: 15px; font-size: 150%">Заполни поле "Время начала сеанса"!</span>
+                            <span name="popupWarning2" style="display: none; color: red; margin-top: 15px; font-size: 150%">Указанное время начала сеанса некорректно! Есть пересечения с другими сеансами на этот день для данного зала.</span>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="popup" id="FilmSession_Del">
+            <div class="popup__container">
+                <div class="popup__content">
+                    <div class="popup__header">
+                        <h2 class="popup__title">
+                            Удаление сеанса из суточного плана
+                            <a class="popup__dismiss" href="#"><img src={{asset('storage/images/admin/close.png')}} alt="Закрыть"></a>
+                        </h2>
+
+                    </div>
+                    <div class="popup__wrapper">
+                        <form accept-charset="utf-8">
+                            <p class="conf-step__paragraph">Вы действительно хотите удалить из суточного плана сенсов фильм <span name="planedFilmName"></span>?</p>
+                            <p class="conf-step__paragraph">Зал <span name="planedHallName"></span>.</p>
+                            <p class="conf-step__paragraph">Дата плана: <span name="planedHallDate"></span>.</p>
+                            
+                            <div class="conf-step__buttons text-center">
+                                <input type="hidden" name="fullSessionName" value="">                                 
+                                <input type="submit" value="Удалить сеанс" class="conf-step__button conf-step__button-accent">
+                                <button class="conf-step__button conf-step__button-regular">Отменить</button>            
+                            </div>
                         </form>
                     </div>
                 </div>

@@ -13,11 +13,10 @@ class FilmTickets extends Model // МОДЕЛЬ таблицы "Билеты н�
     public $timestamps = false;
 
 			
-	public static function relation($film_session_name, $film_number)
+	public static function relation($film_session_name, $film_session_time)
 	{
-		$name = $film_session_name . $film_number . '_tickets';     // $film_session_name представляет собой конкатинацию из HallSessionsPlan::relation ($hall_name . '*' . $sessions_date)
-                                                                    // $film_number это порядковый номер фильма в данный день в данном зале (если один фильм будет представлен несколько раз в этом зале за один день - номер будет отличен от единицы)
-
+		$name = $film_session_name . $film_session_time . '_tickets';     // $film_session_name представляет собой конкатинацию из HallSessionsPlan::relation ($hall_name . '*' . $sessions_date)
+                                                                          // $film_session_time это время начала фильма в данный день в данном зале
         HallSeatsPlan::tableId($name);    // привязка модели к динамически создаваемой таблице c постфиксом "_tickets" в имени
 
         return (new HallSeatsPlan());

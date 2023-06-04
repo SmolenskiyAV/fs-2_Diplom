@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\HallSeatsPlaneCreate;
 use App\Models\HallSessionsPlan;
 use App\Models\HallSessionsPlaneCreate;
+use App\Models\FilmTicketsCreate;
+use App\Models\FilmTickets;
 
 use Illuminate\Support\Facades\Storage;
 
@@ -229,13 +231,40 @@ class TodoController extends Controller
     public function delFilm(Request $request)   //  УДАЛИТЬ ФИЛЬМ
     {
         $film_name = $request->input('film_name');
-                
+               
         $poster_path = public_path() . DB::table('films')->where('film_name', $film_name)->value('poster_path');
         
         unlink($poster_path);
-        //Storage::disk('local')->delete($poster_path);                  // удаление постера, относящегося к данному фильму (не работает,сцуко..) :/
-
+        Storage::disk('local')->delete($poster_path);                  // удаление постера, относящегося к данному фильму (не работает,сцуко..) :/
         Film::where('film_name', $film_name)->delete(); // удаление записи в таблице "Фильм"
+        
+        $allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");    // список всех таблиц БД
+        
+        foreach($allTables as $el) {
+
+            if (preg_match("/.+(\*)[0-9,-]{10}/", $el->name)){  //поиск всех таблиц суточных сеансов <имязала*дата>
+                if (Schema::hasTable($el->name)){
+                    $target_sessions = DB::table($el->name)->select('film_tickets')->get();
+               
+                    foreach ($target_sessions as $table_tickets) {
+                     
+                        if(DB::table($table_tickets->film_tickets)->get()) {
+                            //dd(DB::table($table_tickets->film_tickets)->get());
+                            Schema::drop($table_tickets->film_tickets);                                       // удаление зависимых от данного фильма таблиц "Билеты на сеанс" (относящихся к данному залу на данный день)
+                            $deleted = DB::table($el->name)->where('film_name', $film_name)->delete();     // удаление записи в суточном плане сеансов, для запланированных фильмов с данным именем
+                    
+                            $temporal_array1 = explode("*" , $table_tickets->film_tickets);
+                            $hall_name = current($temporal_array1);
+
+                            $session_planes = (int) (DB::table('halls')->where('hall_name', $hall_name)->value('session_planes')) - (int) $deleted;
+                            DB::table('halls')->where('hall_name', $hall_name)->update([
+                                'session_planes' => $session_planes   // уменьшаем количество действующих планов сеансов для данного зала
+                            ]);
+                        }                  
+                    }    
+                }      
+            }
+        }        
         
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"    
                                             
@@ -300,44 +329,64 @@ class TodoController extends Controller
 
 
 
-    public function addFilmSessions(Request $request) // ДОБАВИТЬ НОВЫЙ СЕАНС В ПЛАН СЕАНСОВ
+    public function infoFilmSession(Request $request) // ОТПАВИТЬ ИНФОРМАЦИЮ О СЕАНСЕ ФИЛЬМА
     {
-        /*
-        $allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");    // список всех таблиц БД
-        $targetTables = [];
-
-        foreach($allTables as $el) {
-
-            if (preg_match("/(_plane)/", $el->name)){
-                $targetTables[] = $el->name;
-            }
-
-        }
-        */
+        $session_name = $request->input('fullSessionName');
         
-        $hall_name = $request->input('hall_planed_name');
-        $session_date = $request->input('session_date');
-        $film_name = $request->input('film_name');
-        $session_time = $request->input('session_time');
-        dd($request->input('session_time'));
-        session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"
-
-                   $sessions_plane = new HallSessionsPlaneCreate();
-            $sessions_plane->up($hall_name . '*' . $session_date);      // создание зависимой таблицы "План сеансов на день"
-
-            $session_planes = (int) (DB::table('halls')->where('hall_name', $hall_name)->value('session_planes')) + 1;
-            
-            DB::table('halls')->where('hall_name', $hall_name)->update([
-                'session_planes' => $session_planes   // увеличиваем количество действующих планов сеансов для данного зала на 1 
-            ]);
-       
-        
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Новый план сеансов зала' . '"'. $hall_name .'"' . ' на ' . $session_date . ' успешно добавлен');
+        return [DB::table($session_name)->get()];
     }
 
 
+    public function changeFilmSession(Request $request) // ВНЕСТИ ИЗМЕНЕИЯ В СЕТКУ СЕАНСОВ
+    {        
+        //dd(json_decode(($request->input('sessionsarray')), true));
+        $request_array = json_decode(($request->input('sessionsarray')), true);
+                
+        foreach($request_array as $session_el) {
 
+            if ($session_el['action'] === 'add') {
+                $hall_name = $session_el['hall_name'];
+                $session_date = $session_el['session_date'];
+                $film_name = $session_el['film_name'];
+                $session_time = $session_el['session_time'];
+                
+                $full_table_name = $hall_name . '*' . $session_date . $session_time . '_tickets';
+                $film_session_name = $hall_name . '*' . $session_date;
 
+                if (Schema::hasTable($full_table_name)) continue; 
+
+                $film = Film::where('film_name', $film_name)->first();
+                $hall = Hall::where('hall_name', $hall_name)->first();
+                $hall_session_film = HallSessionsPlan::relation($session_date, $hall_name);
+
+                $film_session_table = new FilmTicketsCreate();
+                $film_session_table->up($full_table_name);      // создание зависимой таблицы продажи билетов
+                $hall_plane = DB::table($hall_name . '_plane')->get();
+                
+                foreach ($hall_plane as $elem) {    // перенос плана зала в таблицу продажи билетов
+                  
+                    $seat = FilmTickets::relation( $film_session_name, $session_time);
+                    $seat->row = $elem->row;
+                    $seat->number = $elem->number;
+                    $seat->type = $elem->type;
+
+                    $film->session()->save($seat);      // создание записи в зависимой таблице продажи билетов ("место" -> "фильм")
+                }
+
+                $hall_session_film->film_name = $film_name;
+                $hall_session_film->film_tickets = $full_table_name;
+                $hall_session_film->film_start = $session_time;
+                $hall_session_film->film_duration = DB::table('films')->where('film_name', $film_name)->value('film_duration');
+
+                $hall->hallSessionsPlan()->save($hall_session_film);    // создание записи в зависимой таблице "План сеансов на день" ("сеанс" -> "зал")
+            }
+        }         
+        
+
+        session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"
+
+        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Изменения в сетку сеансов успешно добавлены');
+    }
 
 
 
