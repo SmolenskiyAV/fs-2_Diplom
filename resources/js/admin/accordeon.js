@@ -1,5 +1,5 @@
 import {
-  findNodeByInnerHTML, planeFormation, addNewSessionFilm,
+  findNodeByInnerHTML, planeFormation, addNewSessionFilm, addSessionFilmInfo,
 } from './additions';
 
 const headers = Array.from(document.querySelectorAll('.conf-step__header'));
@@ -39,6 +39,7 @@ let addFilmSessionBtns = SeanceConfig.querySelectorAll('h3[name="addfilmsessionb
 let addFilmSessionBtnsLength = addFilmSessionBtns.length;
 const popupFilmSessionAdd = document.getElementById('FilmSession_Add'); //popup "Добавить сеанс фильма в суточный план"
 const popupFilmSessionDel = document.getElementById('FilmSession_Del'); //popup "Удалить сеанс фильма из суточного плана"
+const filmSessionInfo = popupFilmSessionDel.querySelector('div[name="film_session_info"]');
 
 const defaultSeancesPlans = document.getElementById('Seances_Plans');
 let defaultSeancesPlansContent = defaultSeancesPlans.innerHTML; // дефолтная карта всех суточных планов
@@ -59,7 +60,12 @@ let full_plane_name = '';
 let newSessionsArray = [];       // массив, для временного хранения добавленных/удалённых элементов Сетки Сеансов
 let newSessionsArrayLength = 0;
 let editingSessionsPlane = null; // переменная, для временного хранения элемента Суточного Плана, в который будет вставлен новый сеанс
+let editingFilmSession = null; // переменная, для временного хранения элемента сеанса фильма, который планируется удалить из суточного плана
 document.querySelector('input[name="sessionsarray"]').value = [];
+
+let arrayObj = [];
+let rows = 0;
+let seats_per_row = 0;
 
 headers.forEach(header => header.addEventListener('click', () => {
   header.classList.toggle('conf-step__header_closed');
@@ -290,42 +296,68 @@ defaultSeancesPlans.addEventListener('click', (event) => {  // клик-собы
         const currentHallName = currentFullName.substring(0, currentFullName.indexOf("*")); // получаем имя зала из названия суточного плана 
         const currentFilmName = target.parentElement.getAttribute('title');
         const currentSessionTime = target.parentElement.nextElementSibling.textContent;
-        
+        console.log('befor del Arr: ', newSessionsArray);
         if(target.parentElement.parentElement.dataset.mutator === 'add'){
           target.parentElement.parentElement.remove();
+          
+          for (let p = 0; p < newSessionsArrayLength-1; p++) {
+            console.log(`newSessionsArray[${p}] is: `, newSessionsArray[p]);
+            if(newSessionsArray[p].hall_name === currentHallName && 
+              newSessionsArray[p].session_date === currentFilmDate &&
+              newSessionsArray[p].film_name === currentFilmName &&
+              newSessionsArray[p].session_time === currentSessionTime) {
 
-          for (let p = 0; p < newSessionsArrayLength; p++) {
-            if(newSessionsArray.find(item => item.hall_name === currentHallName && 
-                item.session_date === currentFilmDate &&
-                item.film_name === currentFilmName &&
-                item.session_time === currentSessionTime)) {
-              newSessionsArray.splice(p, 1);
-              newSessionsArrayLength = newSessionsArray.length; 
-              document.querySelector('input[name="sessionsarray"]').value = JSON.stringify(newSessionsArray);
-            }
-            console.log('fantom deleted. arr is: ',newSessionsArray);
-            return;
+                const del_id = newSessionsArray[p].temp_id;
+                newSessionsArray.splice(newSessionsArray.findIndex(n => n.temp_id === del_id), 1);  
+                
+                document.querySelector('input[name="sessionsarray"]').value = JSON.stringify(newSessionsArray);
+               
+                if (newSessionsArray.length === 0) SeanceConfig.querySelector('form[name="operate_all_plans"]').style.display = 'none';                               
+            }                      
           }
         }
-        /*
-        popupFilmSessionDel.querySelector('span[name="planedFilmName"]').textContent = currentFilmName;
-        popupFilmSessionDel.querySelector('span[name="planedHallName"]').textContent = currentHallName;
-        popupFilmSessionDel.querySelector('span[name="planedHallDate"]').textContent = currentFilmDate;
-        popupFilmSessionDel.querySelector('input[name="fullSessionName"]').value = currentFullName;
-                
-        popupFilmSessionDel.classList.add('active');
+        
+        if(target.parentElement.parentElement.dataset.mutator === 'stored'){
 
-        let formData = new FormData(popupFilmSessionDel);
-        let xhr = new XMLHttpRequest();
+          popupFilmSessionDel.querySelector('span[name="FilmName"]').textContent = currentFilmName;
+          popupFilmSessionDel.querySelector('span[name="HallName"]').textContent = currentHallName;
+          popupFilmSessionDel.querySelector('span[name="HallDate"]').textContent = currentFilmDate;
+          popupFilmSessionDel.querySelector('input[name="table_tickets"]').value = currentHallName + '*' + currentFilmDate + currentSessionTime + '_tickets';
+          popupFilmSessionDel.querySelector('span[name="session_time"]').textContent = currentSessionTime;
 
-        xhr.open("POST", "/infoFilmSession");
-        xhr.send(formData);
+          editingFilmSession = target.parentElement.parentElement;
 
-        xhr.onload = () => alert(xhr.response);
-        */
+          popupFilmSessionDel.classList.add('active'); 
+
+          let formData = new FormData(popupFilmSessionDel.querySelector('form'));
+          let xhr = new XMLHttpRequest();
+
+          xhr.open("POST", "/infoFilmSession");
+          xhr.responseType = 'json';
+          xhr.send(formData);
+
+          xhr.onload = () => {
+            let responseObj = xhr.response;
+            
+            rows = responseObj[0];
+            seats_per_row = responseObj[1];
+            arrayObj = JSON.parse(responseObj[2])[0];
+                        
+            const sold_arr = addSessionFilmInfo(filmSessionInfo, arrayObj, rows, seats_per_row);    // отрисовка информации о билетах на сеанс
+
+            popupFilmSessionDel.querySelector('span[name="sold_vip"]').textContent = sold_arr[0];
+            popupFilmSessionDel.querySelector('span[name="vacant_vip"]').textContent = sold_arr[2] - sold_arr[0];
+            popupFilmSessionDel.querySelector('span[name="sold_standart"]').textContent = sold_arr[1];
+            popupFilmSessionDel.querySelector('span[name="vacant_standart"]').textContent = sold_arr[3] - sold_arr[1];
+          }
+          
+          xhr.onerror = function() {
+            alert("Запрос не удался");
+          };
+        }
       }
-    }       
-  } 
+    }        
+  }   
   
   if (SessionsPlaneBtnsTrash) {
     for (let d = 0; d < SessionsPlaneBtnsTrashLength; d++) {
@@ -379,22 +411,68 @@ popupFilmSessionDel.addEventListener('click', (event) => { // клик-собы�
   if ((target.alt === 'Закрыть') || (target.innerHTML === "Отменить")) {
     event.preventDefault();
 
-    popupFilmSessionAdd.classList.remove('active');
+    popupFilmSessionDel.classList.remove('active');
 
-    popupFilmSessionDel.querySelector('span[name="planedFilmName"]').textContent = "";
-    popupFilmSessionDel.querySelector('span[name="planedHallName"]').textContent = "";
-    popupFilmSessionDel.querySelector('span[name="planedHallDate"]').textContent = "";
-    popupFilmSessionDel.querySelector('input[name="fullSessionName"]').value = "";   
+    popupFilmSessionDel.querySelector('span[name="FilmName"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="HallName"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="HallDate"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="session_time"]').textContent = "";
+    popupFilmSessionDel.querySelector('input[name="SessionTime"]').value = "";
+
+    popupFilmSessionDel.querySelector('span[name="sold_vip"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="vacant_vip"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="sold_standart"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="vacant_standart"]').textContent = "";
+    
+    arrayObj = [];
+    rows = 0;
+    seats_per_row = 0;
+    filmSessionInfo.innerHTML = '';
   }
 
   if (target.innerHTML === "Удалить сеанс") {
     event.preventDefault();
-  
-    const currenFullSessionName = popupFilmSessionDel.querySelector('input[name="fullSessionName"]').value;              
+    const currentFilmName = popupFilmSessionDel.querySelector('span[name="FilmName"]').textContent;
+    const currentHallName = popupFilmSessionDel.querySelector('span[name="HallName"]').textContent;
+    const currentFilmDate = popupFilmSessionDel.querySelector('span[name="HallDate"]').textContent;
+    const currentSessionTime = popupFilmSessionDel.querySelector('input[name="SessionTime"]').value;              
 
+    let addedNewSession ={
+      hall_name: currentHallName,
+      session_date: currentFilmDate,
+      film_name: currentFilmName,
+      session_time: currentSessionTime,
+      action: 'del'      
+    }
     
-            
+    newSessionsArray.push(addedNewSession);
+    newSessionsArrayLength = newSessionsArray.length; 
+    SeanceConfig.querySelector('form[name="operate_all_plans"]').style.display = 'block';
+    SeanceConfig.querySelector('span[name="popupWarning3"]').style.display = 'block';
+    document.querySelector('input[name="sessionsarray"]').value = JSON.stringify(newSessionsArray);  
+
+    popupFilmSessionDel.classList.remove('active');
+    editingFilmSession.remove();
+        
+    filmSessions = document.getElementById('Seances_Plans').querySelectorAll('div[name="filmSession"]'); // переопределение коллекции всех сеансов в Сетке Сеансов
+    filmSessionsLength = filmSessions.length; 
     
+    popupFilmSessionDel.querySelector('span[name="FilmName"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="HallName"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="HallDate"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="session_time"]').textContent = "";
+    popupFilmSessionDel.querySelector('input[name="SessionTime"]').value = "";
+    editingFilmSession = null;
+
+    popupFilmSessionDel.querySelector('span[name="sold_vip"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="vacant_vip"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="sold_standart"]').textContent = "";
+    popupFilmSessionDel.querySelector('span[name="vacant_standart"]').textContent = "";
+
+    arrayObj = [];
+    rows = 0;
+    seats_per_row = 0;
+    filmSessionInfo.innerHTML = '';
   }
 });
 
@@ -494,10 +572,12 @@ popupFilmSessionAdd.addEventListener('click', (event) => { // клик-собы�
       session_date: currentFilmDate,
       film_name: currentFilmName,
       session_time: currentSessionTime,
-      action: 'add' 
+      action: 'add',
+      temp_id: Math.ceil(Math.random() * 10000) 
     }
     newSessionsArray.push(addedNewSession);
     newSessionsArrayLength = newSessionsArray.length; 
+    SeanceConfig.querySelector('form[name="operate_all_plans"]').style.display = 'block';
     document.querySelector('input[name="sessionsarray"]').value = JSON.stringify(newSessionsArray);  
 
     editingSessionsPlane = null;
@@ -523,11 +603,16 @@ SeanceConfig.querySelector('form[name="operate_all_plans"]').addEventListener('c
     defaultSeancesPlans.innerHTML = "";
     newSessionsArray = [];  
     defaultSeancesPlans.insertAdjacentHTML('afterbegin', defaultSeancesPlansContent); // восстановления дефолтной карты суточных планов
+    SeanceConfig.querySelector('form[name="operate_all_plans"]').style.display = 'none';
+    SeanceConfig.querySelector('span[name="popupWarning3"]').style.display = 'none';
 
+    filmSessions = document.getElementById('Seances_Plans').querySelectorAll('div[name="filmSession"]'); // переопределение коллекции всех сеансов в Сетке Сеансов
+    filmSessionsLength = filmSessions.length; 
     SessionsPlaneBtnsTrash = SeanceConfig.querySelectorAll('.conf-step__button-trash'); // переопределение коллекции кнопок "удалить суточный план"
     SessionsPlaneBtnsTrashLength = SessionsPlaneBtnsTrash.length; 
     addFilmSessionBtns = SeanceConfig.querySelectorAll('h3[name="addfilmsessionbtn"]'); // переопределение коллекции кнопок "добавить сеанс"
     addFilmSessionBtnsLength = addFilmSessionBtns.length;
+    
   }
 
   if (target.value === "Сохранить") {

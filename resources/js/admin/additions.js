@@ -37,3 +37,60 @@ export function findNodeByInnerHTML(nodelist, innerHTML){ // функция по
         </div>`);
     
   }
+
+  export function addSessionFilmInfo(filmSessionInfo, arrayObj, rows, seats_per_row) { // ВСТАВКА ЭЛЕМЕНТА "Билеты на сеанс"
+    
+    const length = arrayObj[0].length;
+    let htm_element = '';
+    let count = 0;
+    let vip_sold = 0;       // продано vip-билетов
+    let vip_all =0;
+    let stndrd_sold = 0;    // продано обычных билетов
+    let stndrd_all = 0;
+
+    for (let s = 0; s < seats_per_row; s++) {
+        htm_element = htm_element + '<div class="conf-step__hall-wrapper" style="margin-left: 4px; margin-right: 4px">\n';
+
+        for (let r = 0; r < rows; r++) {
+            
+            let type = arrayObj[count].type;
+            let sold = arrayObj[count].sold;
+            let qr = arrayObj[count]["qr-code"];
+
+            htm_element = htm_element + '<div style="margin-top: 8px; margin-bottom: 8px">\n';
+
+            if (type === 1 && sold == 0){
+                htm_element = htm_element + `<span class="conf-step__chair conf-step__chair_standart" data-row="${r}" data-seat="${s}" data-type=1></span>\n`;
+                stndrd_all++;
+            } 
+            if (type === 2 && sold == 0){
+                htm_element = htm_element + `<span class="conf-step__chair conf-step__chair_vip" data-row="${r}" data-seat="${s}" data-type=1></span>\n`;
+                vip_all++;
+            }
+
+            if (type === 1 && sold == 1){
+                htm_element = htm_element + `<span class="conf-step__chair conf-step__chair_standart" data-row="${r}" data-seat="${s}" data-type=2 style="border: 3px solid red"></span>\n`;
+                stndrd_all++;
+                stndrd_sold++;
+            } 
+            if (type === 2 && sold == 1){
+                htm_element = htm_element + `<span class="conf-step__chair conf-step__chair_vip" data-row="${r}" data-seat="${s}" data-type=2 style="border: 3px solid red"></span>\n`;
+                vip_sold++;
+                vip_all++;
+            }
+
+            if (type === 0){
+                htm_element = htm_element + `<span class="conf-step__chair conf-step__chair_disabled" data-row="${r}" data-seat="${s}" data-type=0></span>\n`;
+            }
+
+            count++;
+            htm_element = htm_element + '</div>\n';
+        }
+        htm_element = htm_element + '</div>';
+    }
+    
+    filmSessionInfo.insertAdjacentHTML('afterbegin', htm_element);
+
+    return [vip_sold, stndrd_sold, vip_all, stndrd_all];
+    
+  }

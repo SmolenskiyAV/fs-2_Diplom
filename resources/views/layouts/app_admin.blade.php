@@ -102,6 +102,7 @@
                     <div class="popup__wrapper">
                         <form action="{{ route('delHall') }}" method="get" accept-charset="utf-8">
                             <p class="conf-step__paragraph">Вы действительно хотите удалить зал <span></span>?</p>
+                            <p class="conf-step__paragraph" style="color: red; margin-top: 5px">ВНИМАНИЕ! Все суточные планы в сетке сеансов для этого зала также будут удалены!"</p>
                             
                             <div class="conf-step__buttons text-center">
                                 <input type="hidden" name="hall_name" value="">
@@ -345,8 +346,9 @@
                     }
                 }
             @endphp
-
-            <div class="conf-step__seances" id="Seances_Plans"> 
+            
+            
+        <div class="conf-step__seances" id="Seances_Plans"> 
                 @foreach($sessionsPlanTables as $el1)
                     @php
                         $temporal_array1 = explode("*" , $el1);
@@ -370,7 +372,7 @@
 
                         <div class="conf-step__seances-timeline">
                             @foreach($filmSessions as $el2)
-                               
+                            
                                 @php
                                     $filmSessionName = $el2->film_name;
                                     foreach($dataFilms as $el) {
@@ -397,78 +399,39 @@
                         </div>
                     </div>
                 @endforeach
-                
+            
                 <script>// вынужден использовать эту шнягу, т.к. прямая инжекция чрз двойные фиг.скобки от php в style="" не работает, блинн :-/
-                            const HallPlanesMarkers = document.querySelectorAll('span[name="statusMarker"]');
-                            const FilmSessions = document.querySelectorAll('div[name="filmSession"]');                          
-                            if (HallPlanesMarkers) {
-                                let color = '';
-                                for (let j = 0; j < HallPlanesMarkers.length; j++){  // раскрашиваем маркер "$" каждого Плана сеансов
-                                    color = HallPlanesMarkers[j].dataset.color;      // в зависимости от того, открыт зал для продаж или нет
-                                    HallPlanesMarkers[j].style.color = color;                                  
-                                }
+                        const HallPlanesMarkers = document.querySelectorAll('span[name="statusMarker"]');
+                        const FilmSessions = document.querySelectorAll('div[name="filmSession"]');                          
+                        if (HallPlanesMarkers) {
+                            let color = '';
+                            for (let j = 0; j < HallPlanesMarkers.length; j++){  // раскрашиваем маркер "$" каждого Плана сеансов
+                                color = HallPlanesMarkers[j].dataset.color;      // в зависимости от того, открыт зал для продаж или нет
+                                HallPlanesMarkers[j].style.color = color;                                  
                             }
-                            console.log('FilmSessions is: ', FilmSessions);
-                            if (FilmSessions) {
-                                let startpixel = '';
-                                let width = '';
-                                for (let j = 0; j < FilmSessions.length; j++){            
-                                    startpixel = FilmSessions[j].dataset.startpixel;
-                                    width = FilmSessions[j].dataset.stoppixel - startpixel;
-                                    FilmSessions[j].style.left = `${startpixel}px`;         // в зависимости от установленного начального времени смещаем каждый сеанс внутри суточного плана
-                                    FilmSessions[j].style.width = `${width}px`;             // задаём ширину блока div в зависимости от продолжительности сеанса                                                                                                                                                       
-                                }
+                        }
+                        console.log('FilmSessions is: ', FilmSessions);
+                        if (FilmSessions) {
+                            let startpixel = '';
+                            let width = '';
+                            for (let j = 0; j < FilmSessions.length; j++){            
+                                startpixel = FilmSessions[j].dataset.startpixel;
+                                width = FilmSessions[j].dataset.stoppixel - startpixel;
+                                FilmSessions[j].style.left = `${startpixel}px`;         // в зависимости от установленного начального времени смещаем каждый сеанс внутри суточного плана
+                                FilmSessions[j].style.width = `${width}px`;             // задаём ширину блока div в зависимости от продолжительности сеанса                                                                                                                                                       
                             }
+                        }
                 </script>
+            </div>     
+                      
 
-            </div>
-
-            <!--<div class="conf-step__seances">                
-                <div class="conf-step__seances-hall">                    
-                    <div style="display: flex;">
-                        <span style="text-decoration: none; color: black; margin-right: 5px"><h3 class="conf-step__seances-title" style="cursor:pointer">Зал 1</h3><small style="cursor:default">2023-06-1</small></span>
-                        <span style="color: black; font-size: 200%; margin-right: 10px; cursor: pointer">&#36;</span>
-                        <button class="conf-step__button conf-step__button-trash"></button>
-                    </div>
-                    <div class="conf-step__seances-timeline">
-                        <div class="conf-step__seances-movie" style="width: 60px; background-color: rgb(133, 255, 137); left: 0px; cursor: pointer;">
-                            <!--<p class="conf-step__seances-movie-title" style="font-size: 90%;">Миссия выполнима</p>
-                            <fieldset title="Миссия выполнима">
-                                <img class="conf-step__movie-poster" style="width: 100%; height: 100%; top: 0; left: 0; position: absolute;" alt="poster" src={{asset("storage/images/films/Джун_камикадзе_poster.jpg")}}>
-                            </fieldset>
-                            <p class="conf-step__seances-movie-start">00:00</p>
-                        </div>
-                        <div class="conf-step__seances-movie" style="width: 60px; background-color: rgb(133, 255, 137); left: 360px;">
-                            <p class="conf-step__seances-movie-title">Миссия выполнима</p>
-                            <p class="conf-step__seances-movie-start">12:00</p>
-                        </div>
-                        <div class="conf-step__seances-movie" style="width: 65px; background-color: rgb(202, 255, 133); left: 420px;">
-                            <p class="conf-step__seances-movie-title">Звёздные войны XXIII: Атака клонированных клонов</p>
-                            <p class="conf-step__seances-movie-start">14:00</p>
-                        </div>
-                    </div>                    
-                </div>
-                <div class="conf-step__seances-hall">
-                    <h3 class="conf-step__seances-title">Зал 2</h3>
-                    <div class="conf-step__seances-timeline">
-                        <div class="conf-step__seances-movie" style="width: 65px; background-color: rgb(202, 255, 133); left: 595px;">
-                            <p class="conf-step__seances-movie-title">Звёздные войны XXIII: Атака клонированных клонов</p>
-                            <p class="conf-step__seances-movie-start">19:50</p>
-                        </div>
-                        <!--<div class="conf-step__seances-movie" style="width: 60px; background-color: rgb(133, 255, 137); left: 660px;">
-                            <p class="conf-step__seances-movie-title">Миссия выполнима</p>
-                            <p class="conf-step__seances-movie-start">22:00</p>
-                        </div>
-                    </div>
-                </div>
-            </div>-->
-
-            <form action="{{route('changeFilmSession')}}" method="post" enctype="multipart/form-data" accept-charset="utf-8" name="operate_all_plans" class="conf-step__buttons text-center">
+            <form action="{{route('changeFilmSession')}}" method="post" enctype="multipart/form-data" accept-charset="utf-8" name="operate_all_plans" class="conf-step__buttons text-center" style="display: none">
                 @csrf
                 <button class="conf-step__button conf-step__button-regular">Отмена</button>
                 <input type="hidden" name="sessionsarray" value="">
                 <input type="submit" value="Сохранить" class="conf-step__button conf-step__button-accent">
             </form>
+            <span name="popupWarning3" style="display: none; color: red; margin-top: 15px; font-size: 150%">Запланированы удаления существующих сеансов. Сохранить изменения?</span>
         </div>
 
         <div class="popup" id="Films_Add">
@@ -519,6 +482,7 @@
                     <div class="popup__wrapper">
                         <form action="{{ route('delFilm') }}" method="get" accept-charset="utf-8">
                             <p class="conf-step__paragraph">Вы действительно хотите удалить фильм "<span></span>"?</p>
+                            <p class="conf-step__paragraph" style="color: red; margin-top: 5px">ВНИМАНИЕ! Все запланированные сеансы этого фильма также будут удалены!"</p>
                             
                             <div class="conf-step__buttons text-center">
                                 <input type="hidden" name="film_name" value="">
@@ -662,14 +626,26 @@
 
                     </div>
                     <div class="popup__wrapper">
-                        <form accept-charset="utf-8">
-                            <p class="conf-step__paragraph">Вы действительно хотите удалить из суточного плана сенсов фильм <span name="planedFilmName"></span>?</p>
-                            <p class="conf-step__paragraph">Зал <span name="planedHallName"></span>.</p>
-                            <p class="conf-step__paragraph">Дата плана: <span name="planedHallDate"></span>.</p>
+                        <form method="POST" action="/profile" accept-charset="utf-8" accept-charset="utf-8">
+                            @csrf
+                            <p class="conf-step__paragraph">Вы действительно хотите удалить из суточного плана сенсов фильм "<span name="FilmName"></span>"?</p>
+                            <p class="conf-step__paragraph" style="margin-top: 3px">Зал "<span name="HallName"></span>".</p>
+
+                            <div class="conf-step__hall" name="film_session_info"></div>
+
+                            <p class="conf-step__paragraph" style="margin-top: 3px; margin-bottom: 0px">Дата сеанса: <span name="HallDate"></span>.</p>
+                            <p class="conf-step__paragraph" style="margin-top: 0px">Время сеанса: <span name="session_time"></span>.</p>
+                            <div >
+                                <p class="conf-step__paragraph" style="margin-top: 10px; margin-bottom: 0px; color: red">Продано vip-билетов: <span name="sold_vip"></span>.</p>
+                                <p class="conf-step__paragraph" style="margin-top: 0px; margin-bottom: 0px;">Осталось vip-билетов: <span name="vacant_vip"></span>.</p>
+                                <p class="conf-step__paragraph" style="margin-top: 8px; margin-bottom: 0px; color: red">Продано обычных билетов: <span name="sold_standart"></span>.</p>
+                                <p class="conf-step__paragraph" style="margin-top: 0px; margin-bottom: 0px;">Осталось обычных билетов: <span name="vacant_standart"></span>.</p>
+                            </div>
                             
                             <div class="conf-step__buttons text-center">
-                                <input type="hidden" name="fullSessionName" value="">                                 
-                                <input type="submit" value="Удалить сеанс" class="conf-step__button conf-step__button-accent">
+                                <input type="hidden" name="SessionTime" value="">
+                                <input type="hidden" name="table_tickets" value="">                                
+                                <button class="conf-step__button conf-step__button-accent">Удалить сеанс</button>
                                 <button class="conf-step__button conf-step__button-regular">Отменить</button>            
                             </div>
                         </form>
