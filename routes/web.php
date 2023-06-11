@@ -94,3 +94,5 @@ Route::get('/delSessionsPlan', [TodoController::class, 'delSessionsPlan'])->name
 
 Route::post('/infoFilmSession', [TodoController::class, 'infoFilmSession'])->name('infoFilmSession');
 Route::post('/changeFilmSession', [TodoController::class, 'changeFilmSession'])->name('changeFilmSession');
+
+Route::get('/changeSaleStatus', [TodoController::class, 'changeSaleStatus'])->name('changeSaleStatus');

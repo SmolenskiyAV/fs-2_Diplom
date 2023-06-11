@@ -14,10 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::create('halls_billing', function (Blueprint $table) {   // ТАБЛИЦА "ЦЕНЫ НА МЕСТА В ЗАЛЕ"
-            $table->id();
+            $table->id();            
             $table->unsignedBigInteger('hall_id')->nullable();
             $table->foreign('hall_id')
-                ->references('id')->on('halls')->onDelete(('cascade'));
+                ->references('id')->on('halls')->onDelete('cascade');
 
             $table->string('hall_name') ->default(0);    // название зала
             $table->integer('usual_cost') ->default(0);  // цена за обычное место

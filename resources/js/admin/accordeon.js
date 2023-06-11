@@ -26,7 +26,6 @@ let SessionsPlaneBtnsTrash = SeanceConfig.querySelectorAll('.conf-step__button-t
 let SessionsPlaneBtnsTrashLength = SessionsPlaneBtnsTrash.length;
 const addFilmBtn = findNodeByInnerHTML(SeanceConfig.querySelectorAll('.conf-step__button-accent'), 'Добавить фильм');
 const addHallSessionsPlanBtn = findNodeByInnerHTML(SeanceConfig.querySelectorAll('.conf-step__button-accent'), 'Добавить суточный план');
-const cancelBtnFilm = findNodeByInnerHTML(SeanceConfig.querySelectorAll('.conf-step__button-regular'), 'Отмена');
 
 const popupFilmAdd = document.getElementById('Films_Add'); //popup "Добавить фильм"
 const popupDeleteFilm = document.getElementById('Films_Delete'); //popup "Удалить фильм"
@@ -46,7 +45,12 @@ let defaultSeancesPlansContent = defaultSeancesPlans.innerHTML; // дефолт�
 let filmSessions = document.getElementById('Seances_Plans').querySelectorAll('div[name="filmSession"]'); // коллекция всех сеансов в Сетке Сеансов
 let filmSessionsLength = filmSessions.length;
 
-const SaleStatus = document.getElementById('Sale_Status');      //секция "Открыть продажи"
+const Sale_Status = document.getElementById('Sale_Status');  //секция "Открыть продажи"
+
+const WaitBgrnd = document.getElementById('Waiting_Background');      // заглушка "Фон ожидания"
+const setHallSize = document.getElementById('SetHallSize');           
+const setHallSizeBtn = setHallSize.querySelector('button[value="Задать размер зала"]'); // кнопка "задать размер зала"
+const SetHallPlane = document.getElementById('SetHallPlane');       // форма отправки нового плана зала
 
 let hall_name = '';
 let film_name = '';
@@ -84,6 +88,10 @@ popupCreateHall.addEventListener('click', (event) => { // клик-событи�
     InputCreateHall.value = '';
     popupCreateHall.classList.remove('active');
   }
+
+  if ((target.value === 'Добавить зал') && (popupCreateHall.querySelector('input[name="hall_name"]').checkValidity())) {    // ЗАГЛУШКА "Жди..."
+      WaitBgrnd.classList.add('active');
+  }
 });
 
 for (let d = 0; d < HallsControlBtnsTrash.length; d++) {
@@ -109,8 +117,29 @@ popupDeleteHall.addEventListener('click', (event) => { // клик-событи�
     hall_name = '';
     popupDeleteHall.querySelector('input[name="hall_name"]').value = '';  // очистка скрытого поля формы "Удалить зал"
   }
-  
+
+  if (target.value === 'Удалить') { // ЗАГЛУШКА "Жди..."
+    WaitBgrnd.classList.add('active');
+  }  
 });
+
+if (setHallSizeBtn) {
+    setHallSizeBtn.addEventListener('click', () => { // клик "Задать размер зала"
+        
+        if ((setHallSize.querySelector('input[name="rows"]').checkValidity())     // ЗАГЛУШКА "Жди..."
+            && (setHallSize.querySelector('input[name="seats_per_row"]').checkValidity())) { 
+
+        WaitBgrnd.classList.add('active');
+    }
+});
+};
+
+if (SetHallPlane) {
+    SetHallPlane.querySelector('input[value="Сохранить"]').addEventListener('click', () => { // клик "Сохранить" для отправки нового плана зала
+    
+        WaitBgrnd.classList.add('active');  // ЗАГЛУШКА "Жди..."  
+    });
+};
 
 for (let i = 0; i < InputFields.length; i++) {    // Разрешаем ввод только цифр в полях input секций "Конфигурация залов" и "Конфигурация цен"
   InputFields[i].addEventListener('keydown', (event) =>{ 
@@ -224,6 +253,16 @@ popupFilmAdd.addEventListener('click', (event) => { // клик-события �
     document.querySelector('input[name="poster"]').value = '';
     popupFilmAdd.classList.remove('active');
   }
+
+  if ((target.value === 'Добавить фильм') // ЗАГЛУШКА "Жди..."
+        && (popupFilmAdd.querySelector('input[name="film_name"]').checkValidity())
+        && (popupFilmAdd.querySelector('input[name="film_duration"]').checkValidity())
+        && (popupFilmAdd.querySelector('input[name="poster"]').checkValidity())) { 
+
+    popupFilmAdd.classList.remove('active');
+    WaitBgrnd.classList.add('active');
+  }
+
 });
 
 for (let t = 0; t < FilmsTitleElementTrash.length; t++) {
@@ -262,7 +301,12 @@ popupDeleteFilm.addEventListener('click', (event) => { // клик-событи�
     film_name = '';
     popupDeleteFilm.querySelector('input[name="film_name"]').value = '';  // очистка скрытого поля формы "Удалить фильм"
   }
-  
+
+  if (target.value === 'Удалить') { // ЗАГЛУШКА "Жди..."
+
+    popupDeleteFilm.classList.remove('active');
+    WaitBgrnd.classList.add('active');
+  }  
 });
 
 if (addHallSessionsPlanBtn){
@@ -282,6 +326,13 @@ popupHallSessionsPlan.addEventListener('click', (event) => { // клик-соб�
 
     popupHallSessionsPlan.classList.remove('active');
   }
+
+  if ((target.value === 'Добавить план') 
+  && (popupHallSessionsPlan.querySelector('input[name="sessions_date"]').checkValidity())) { 
+    
+    popupHallSessionsPlan.classList.remove('active');
+    WaitBgrnd.classList.add('active'); // ЗАГЛУШКА "Жди..."
+  }  
 });
 
 defaultSeancesPlans.addEventListener('click', (event) => {  // клик-события внутри секции "СЕТКА СЕАНСОВ"
@@ -296,12 +347,12 @@ defaultSeancesPlans.addEventListener('click', (event) => {  // клик-собы
         const currentHallName = currentFullName.substring(0, currentFullName.indexOf("*")); // получаем имя зала из названия суточного плана 
         const currentFilmName = target.parentElement.getAttribute('title');
         const currentSessionTime = target.parentElement.nextElementSibling.textContent;
-        console.log('befor del Arr: ', newSessionsArray);
+        
         if(target.parentElement.parentElement.dataset.mutator === 'add'){
           target.parentElement.parentElement.remove();
           
           for (let p = 0; p < newSessionsArrayLength-1; p++) {
-            console.log(`newSessionsArray[${p}] is: `, newSessionsArray[p]);
+            
             if(newSessionsArray[p].hall_name === currentHallName && 
               newSessionsArray[p].session_date === currentFilmDate &&
               newSessionsArray[p].film_name === currentFilmName &&
@@ -352,7 +403,8 @@ defaultSeancesPlans.addEventListener('click', (event) => {  // клик-собы
           }
           
           xhr.onerror = function() {
-            alert("Запрос не удался");
+            alert("Запрос не удался!");
+            location.reload();
           };
         }
       }
@@ -435,7 +487,7 @@ popupFilmSessionDel.addEventListener('click', (event) => { // клик-собы�
     const currentFilmName = popupFilmSessionDel.querySelector('span[name="FilmName"]').textContent;
     const currentHallName = popupFilmSessionDel.querySelector('span[name="HallName"]').textContent;
     const currentFilmDate = popupFilmSessionDel.querySelector('span[name="HallDate"]').textContent;
-    const currentSessionTime = popupFilmSessionDel.querySelector('input[name="SessionTime"]').value;              
+    const currentSessionTime = popupFilmSessionDel.querySelector('span[name="session_time"]').textContent;              
 
     let addedNewSession ={
       hall_name: currentHallName,
@@ -444,7 +496,7 @@ popupFilmSessionDel.addEventListener('click', (event) => { // клик-собы�
       session_time: currentSessionTime,
       action: 'del'      
     }
-    
+    console.log('session_time: currentSessionTime is: ', currentSessionTime);
     newSessionsArray.push(addedNewSession);
     newSessionsArrayLength = newSessionsArray.length; 
     SeanceConfig.querySelector('form[name="operate_all_plans"]').style.display = 'block';
@@ -488,7 +540,11 @@ popupDeleteSessionsPlane.addEventListener('click', (event) => { // клик-со
     full_plane_name = '';
     popupDeleteSessionsPlane.querySelector('input[name="fullPlanedName"]').value = '';  // очистка скрытого поля формы "Удалить суточный план"
   }
-  
+
+  if (target === popupDeleteSessionsPlane.querySelector('value[name="Удалить"]')) {
+    
+    WaitBgrnd.classList.add('active');  // ЗАГЛУШКА "Жди..."
+  }  
 });
 
 popupFilmSessionAdd.addEventListener('click', (event) => { // клик-события внутри popup "Добавить сеанс в суточный план"
@@ -515,15 +571,7 @@ popupFilmSessionAdd.addEventListener('click', (event) => { // клик-собы�
       
           popupFilmSessionAdd.querySelector('span[name="popupWarning1"]').style.display = 'block';
       return;
-    }
-    /*
-    let formData = new FormData(popupFilmSessionAdd.querySelector('form'));
-    let xhr = new XMLHttpRequest();
-
-    xhr.open("POST", "/addFilmSessions");
-    xhr.send(formData);
-
-    xhr.onload = () => alert(xhr.response);*/
+    }    
             
     const currentHallName = popupFilmSessionAdd.querySelector('span[name="hall_name"]').textContent;
     const currentFilmDate = popupFilmSessionAdd.querySelector('span[name="film_date"]').textContent;
@@ -616,18 +664,15 @@ SeanceConfig.querySelector('form[name="operate_all_plans"]').addEventListener('c
   }
 
   if (target.value === "Сохранить") {
-    console.log('***Final Array***')
-    console.log('newSessionsArray is: ', newSessionsArray);
-    console.log('*** end ***');
-    
-    /*
-    let formData = new FormData(popupFilmSessionDel);
-    let xhr = new XMLHttpRequest();
 
-    xhr.open("POST", "/changeFilmSession");
-    xhr.send(formData);
-
-    //xhr.onload = () => alert(xhr.response);*/
+    WaitBgrnd.classList.add('active');  // ЗАГЛУШКА "Жди..." 
   }
 
 }); 
+
+if (Sale_Status.querySelector('button[type="submit"]')) {
+    Sale_Status.querySelector('button[type="submit"]').addEventListener('click', () => { // клик "Закрыть/Открыть продажу билетов"
+    
+        WaitBgrnd.classList.add('active');  // ЗАГЛУШКА "Жди..."  
+    });
+}

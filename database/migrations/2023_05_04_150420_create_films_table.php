@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('film_name', 60)->nullable(false)->unique('film_name');    // имя фильма 
             $table->integer('film_duration')->nullable(false);
             $table->string('poster_path');                                            // путь к постеру фильма на сервере
+            $table->integer('session_films') ->default(0);             // количество действующих сеансов для данного фильма
             $table->string('admin_updater', 100) ->nullable(); 
             $table->timestamps();
         });

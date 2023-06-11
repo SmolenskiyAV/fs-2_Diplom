@@ -31,6 +31,7 @@
         $randomID = '';
         $status_color = 'black';
         $posterBackground_path = '';
+        $sale_status = false;
         
         function generateRandomString($length = 10) {
             $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -114,6 +115,16 @@
                 </div>
             </div>
         </div>
+
+        <div class="popup" id="Waiting_Background">
+            <div class="popup__container">
+                <div class="popup__content">
+                    <div class="popup__wrapper">                        
+                        <p class="conf-step__paragraph">Передача данных на сервер. Жди...</p>                       
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <section class="conf-step" id="Hall_Config">
@@ -163,7 +174,7 @@
             </ul>
             <p class="conf-step__paragraph">Укажите количество рядов (не более 40) и максимальное количество кресел в ряду (не более 50):</p>
             
-            <form action="{{route('sizeHall')}}" method="post" accept-charset="utf-8">
+            <form id="SetHallSize" action="{{route('sizeHall')}}" method="post" accept-charset="utf-8">
                 @csrf
                 <div class="conf-step__legend">
                     <label class="conf-step__label">Рядов, шт<input type="text" name="rows" class="conf-step__input" placeholder="10" value="{{ $hall_rows_cfg }}" required></label>
@@ -213,7 +224,7 @@
                 </div>
             
                 <fieldset class="conf-step__buttons text-center">                    
-                    <form action="{{route('planeHall')}}" method="post" accept-charset="utf-8">
+                    <form id="SetHallPlane" action="{{route('planeHall')}}" method="post" accept-charset="utf-8">
                         @csrf
                         <button class="conf-step__button conf-step__button-regular" style="margin-right: 15px">Отмена</button>
                         <input type="hidden" name="hall_cfg_name" value="{{$hall_name_cfg}}">
@@ -271,11 +282,11 @@
             <form action="{{route('billingHall')}}" method="post" accept-charset="utf-8">
                 @csrf
                 <div class="conf-step__legend">
-                    <label class="conf-step__label">Цена, рублей<input type="text" name="hall_usual_cost" class="conf-step__input" placeholder="0" value="{{ DB::table('halls_billing')->where('hall_name', $hall_name_cfg)->value('usual_cost') }}"></label>
+                    <label class="conf-step__label">Цена, рублей<input type="text" name="hall_usual_cost" class="conf-step__input" placeholder="0" value="{{ DB::table('halls_billing')->where('hall_name', $hall_name_cfg)->value('usual_cost') }}" required></label>
                         за <span class="conf-step__chair conf-step__chair_standart"></span> обычные кресла
                 </div>
                 <div class="conf-step__legend">
-                    <label class="conf-step__label">Цена, рублей<input type="text" name="hall_vip_cost" class="conf-step__input" placeholder="0" value="{{ DB::table('halls_billing')->where('hall_name', $hall_name_cfg)->value('vip_cost') }}"></label>
+                    <label class="conf-step__label">Цена, рублей<input type="text" name="hall_vip_cost" class="conf-step__input" placeholder="0" value="{{ DB::table('halls_billing')->where('hall_name', $hall_name_cfg)->value('vip_cost') }}" required></label>
                         за <span class="conf-step__chair conf-step__chair_vip"></span> VIP кресла
                 </div>
 
@@ -327,7 +338,7 @@
                 </p>
             @endif
 
-            <p class="conf-step__paragraph2 conf-step__legend" style="margin-bottom: 2px;">Для добавления новых сеансов в суточный план кликните по названию зала.</p>
+            <p class="conf-step__paragraph2 conf-step__legend" style="margin-bottom: 2px;">Для добавления новых сеансов в суточный план кликните по названию зала (нужного плана).</p>
             <p class="conf-step__paragraph2 conf-step__legend">Для удаления сеанса фильма (внутри суточного плана) кликните по иконке сеанса.</p>
             
             @php
@@ -355,18 +366,28 @@
                         $planedHallName = current($temporal_array1);
                         $planedHallDate = end($temporal_array1);
                         $filmSessions = DB::table($el1)->get();
+
+                        if(count($sessionsDayPlanTables) == 0) {
+                            DB::table('halls')->where('hall_name', $planedHallName)->update(['active' => false]);
+                        }
+                        
                         $hallStatus = DB::table('halls')->where('hall_name', $planedHallName)->value('active');
                         if ($hallStatus) {
                             $status_color = 'green';    // зал открыт для продаж
+                            $status_text = 'Продажи открыты';
+                            $sale_status = true;        // все продажи билетов открыты
                         } else {
                             $status_color = 'red';      // зал закрыт для продаж
+                            $status_text = 'Продажи закрыты!';                          
                         }
                         $randomID = generateRandomString();
                     @endphp
                     <div class="conf-step__seances-hall">
                         <div style="display: flex;">
                             <span href="#" style="text-decoration: none; color: black; margin-right: 5px"><h3 class="conf-step__seances-title" name="addfilmsessionbtn" style="cursor:pointer">{{ $planedHallName }}</h3><small style="cursor:default">{{ $planedHallDate }}</small></span>
-                            <span name="statusMarker" data-color="{{ $status_color }}" style="font-size: 200%; margin-right: 10px; cursor: pointer;">&#36;</span>
+                            <fieldset title="{{ $status_text }}" style="border:0 none">
+                                <span name="statusMarker" data-color="{{ $status_color }}" style="font-size: 200%; margin-right: 10px; cursor: pointer;">&#36;</span>
+                            </fieldset> 
                             <button class="conf-step__button conf-step__button-trash" data-planedhallname="{{ $planedHallName }}" data-planedhalldate="{{ $planedHallDate }}" data-fullplanedname="{{ $el1 }}"></button>                        
                         </div>
 
@@ -634,7 +655,7 @@
                             <div class="conf-step__hall" name="film_session_info"></div>
 
                             <p class="conf-step__paragraph" style="margin-top: 3px; margin-bottom: 0px">Дата сеанса: <span name="HallDate"></span>.</p>
-                            <p class="conf-step__paragraph" style="margin-top: 0px">Время сеанса: <span name="session_time"></span>.</p>
+                            <p class="conf-step__paragraph" style="margin-top: 0px">Начало сеанса: <span name="session_time"></span>.</p>
                             <div >
                                 <p class="conf-step__paragraph" style="margin-top: 10px; margin-bottom: 0px; color: red">Продано vip-билетов: <span name="sold_vip"></span>.</p>
                                 <p class="conf-step__paragraph" style="margin-top: 0px; margin-bottom: 0px;">Осталось vip-билетов: <span name="vacant_vip"></span>.</p>
@@ -659,13 +680,28 @@
         <header class="conf-step__header conf-step__header_opened">
             <h2 class="conf-step__title">Открыть продажи</h2>
         </header>
-        <div class="conf-step__wrapper text-center">
-            <p class="conf-step__paragraph">Всё готово, теперь можно:</p>
-            <button class="conf-step__button conf-step__button-accent">Открыть продажу билетов</button>
-        </div>
+        @if(count($sessionsDayPlanTables) > 0)
+            <form action="{{ route('changeSaleStatus') }}" method="get" accept-charset="utf-8">
+                @csrf
+                <div class="conf-step__wrapper text-center">
+                    @if($sale_status)
+                        <p class="conf-step__paragraph">Продажа билетов открыта.</p>
+                        <input type="hidden" name="sale_status" value="0">
+                        <button type="submit" class="conf-step__button conf-step__button-accent">Закрыть продажу билетов</button>
+                    @else
+                        <p class="conf-step__paragraph">Всё готово, теперь можно:</p>
+                        <input type="hidden" name="sale_status" value="1">
+                        <button type="submit" class="conf-step__button conf-step__button-accent">Открыть продажу билетов</button>
+                    @endif
+                </div>
+            </form>
+        @else
+            <div class="conf-step__wrapper text-center">
+                <p class="conf-step__paragraph">Чтобы открыть продажу билетов, необходимо создать хотябы один сеанс в любом суточном плане!</p>                
+            </div>
+        @endif
     </section>
 </main>
-
 
 
 @vite('resources/js/admin/accordeon.js')
