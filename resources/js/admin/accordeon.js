@@ -251,6 +251,8 @@ popupFilmAdd.addEventListener('click', (event) => { // клик-события �
     document.querySelector('input[name="film_name"]').value = "";
     document.querySelector('input[name="film_duration"]').value = '';
     document.querySelector('input[name="poster"]').value = '';
+    document.querySelector('input[name="film_country"]').value = '';
+    document.querySelector('textarea[name="film_description"]').value = '';
     popupFilmAdd.classList.remove('active');
   }
 
@@ -379,14 +381,14 @@ defaultSeancesPlans.addEventListener('click', (event) => {  // клик-собы
           editingFilmSession = target.parentElement.parentElement;
 
           popupFilmSessionDel.classList.add('active'); 
-
+          
           let formData = new FormData(popupFilmSessionDel.querySelector('form'));
           let xhr = new XMLHttpRequest();
 
           xhr.open("POST", "/infoFilmSession");
           xhr.responseType = 'json';
           xhr.send(formData);
-
+          
           xhr.onload = () => {
             let responseObj = xhr.response;
             
@@ -395,7 +397,7 @@ defaultSeancesPlans.addEventListener('click', (event) => {  // клик-собы
             arrayObj = JSON.parse(responseObj[2])[0];
                         
             const sold_arr = addSessionFilmInfo(filmSessionInfo, arrayObj, rows, seats_per_row);    // отрисовка информации о билетах на сеанс
-
+            
             popupFilmSessionDel.querySelector('span[name="sold_vip"]').textContent = sold_arr[0];
             popupFilmSessionDel.querySelector('span[name="vacant_vip"]').textContent = sold_arr[2] - sold_arr[0];
             popupFilmSessionDel.querySelector('span[name="sold_standart"]').textContent = sold_arr[1];
@@ -403,7 +405,7 @@ defaultSeancesPlans.addEventListener('click', (event) => {  // клик-собы
           }
           
           xhr.onerror = function() {
-            alert("Запрос не удался!");
+            alert("Запрос к серверу не удался!");
             location.reload();
           };
         }
@@ -496,7 +498,7 @@ popupFilmSessionDel.addEventListener('click', (event) => { // клик-собы�
       session_time: currentSessionTime,
       action: 'del'      
     }
-    console.log('session_time: currentSessionTime is: ', currentSessionTime);
+    
     newSessionsArray.push(addedNewSession);
     newSessionsArrayLength = newSessionsArray.length; 
     SeanceConfig.querySelector('form[name="operate_all_plans"]').style.display = 'block';

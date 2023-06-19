@@ -183,7 +183,8 @@
                     <div class="conf-step__buttons">                        
                         <input type="hidden" name="hall_cfg_size" value="{{$hall_name_cfg}}">
                         @if (Schema::hasTable($hall_name_cfg.'_plane'))
-                            <p class="conf-step__paragraph" style="color: red">ВНИМАНИЕ! При смене размера зала, его схема сбрасывается в дефолтное состояние.</p>
+                            <p class="conf-step__paragraph" style="color: red; margin-bottom: 2px">ВНИМАНИЕ! При смене размера зала, его схема сбрасывается в дефолтное состояние.</p>
+                            <p class="conf-step__paragraph" style="color: red; margin-top: 0px;  margin-bottom: 0px; padding-left: 97px">Прежняя планировка зала в уже запланированных сеансах останется без изменений!</p>
                             <button type="submit" value="Задать размер зала" class="conf-step__button conf-step__button-accent">Задать размер зала</button>
                         @endif
                     </div>
@@ -472,9 +473,17 @@
                                 Название фильма
                                 <input class="conf-step__inputв" type="text" placeholder="Например, &laquo;Эммануэль&raquo;" name="film_name" value="{{ old('film_name') }}" required>
                             </label>
+                            <label class="conf-step__label conf-step__label-fullsize" for="film_description">
+                                <p><b>Описание фильма:</b></p>
+                                <p><textarea class="conf-step__inputв" type="text" placeholder="Например, &laquo;Однажды сельская девушка лёгкого поведения решила выйти замуж..&raquo;" rows="4" cols="60" name="film_description" value="{{ old('film_description') }}"></textarea></p>
+                            </label>
+                            <label class="conf-step__label conf-step__label-fullsize" for="film_country">
+                                Страна происхождения фильма
+                                <input class="conf-step__inputв" type="text" placeholder="Например, &laquo;Италия&raquo;" name="film_country" value="{{ old('film_country') }}">
+                            </label>
                             <label class="conf-step__label conf-step__label-fullsize" for="film_duration">
                                 Продолжительность фильма в минутах:
-                                <input class="conf-step__inputв" type="number" name="film_duration" value="{{ old('film_duration') }}" min="10" max="180" required>
+                                <input class="conf-step__inputв" type="number" name="film_duration" value="{{ old('film_duration') }}" min="10" max="180" size="4" required>
                             </label>
                             <label class="conf-step__label conf-step__label-fullsize" for="poster">
                                 Постер фильма jpg, png, bmp, jpeg, svg

@@ -102,11 +102,7 @@ class TodoController extends Controller
         }        
 
         foreach($allTables as $el) {    // удаление всех зависимых от данного зала таблиц
-             /*
-            if (preg_match("/.+(\*)[0-9,-]{10}$/", $el->name)){  //поиск всех удаляемых таблиц суточных сеансов <имязала*дата>
-                DB::table('halls')->where('hall_name', $hall_name)->decrement('session_planes', 1);    // уменьшаем количество действующих планов сеансов для данного зала на 1
-            }*/
-
+            
             if (str_contains($el->name, $hall_name)){
                 Schema::drop($el->name);               
             }            
@@ -229,6 +225,8 @@ class TodoController extends Controller
         $film_name = $request->input('film_name');
         $duration = $request->input('film_duration');        
         $extension = $request->poster->extension(); // получить расширение файла
+        $film_country = $request->input('film_country');
+        $film_description = $request->input('film_description');
         
         $poster_name = $film_name . '_poster';
         $poster_name = preg_replace('/[[:punct:]]|[\s\s+]/', '_', $poster_name);  //заменяем пробелы и спецсимволы из имени постера на "_";
@@ -244,6 +242,8 @@ class TodoController extends Controller
         $film->film_duration = (int) $duration;
         $film->film_name = $film_name;
         $film->poster_path = '/storage/images/films/' . "$poster_name.$extension";
+        $film->description = $film_description;
+        $film->country_source = $film_country;
         
         $film->save();                          // создание записи в таблице "фильм"
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"        
@@ -260,7 +260,7 @@ class TodoController extends Controller
         $poster_path = public_path() . DB::table('films')->where('film_name', $film_name)->value('poster_path');
         unlink($poster_path);
 
-        Storage::disk('local')->delete($poster_path);                  // удаление постера, относящегося к данному фильму (не работает,сцуко..) :/
+        //Storage::disk('local')->delete($poster_path);                  // удаление постера, относящегося к данному фильму (не работает,сцуко..) :/
         Film::where('film_name', $film_name)->delete();                // удаление записи в таблице "Фильм"
         
         $allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");    // список всех таблиц БД
@@ -343,14 +343,23 @@ class TodoController extends Controller
     public function infoFilmSession(Request $request) // ОТПРАВИТЬ ИНФОРМАЦИЮ О БИЛЕТАХ НА СЕАНС ФИЛЬМА
     {   
         $session_name = json_encode([DB::table($request->input('table_tickets'))->get()]);
-
-        $temporal_array1 = explode("*" , $request->input('table_tickets'));
-        $hall_name = current($temporal_array1);
-
-        $row = DB::table('halls')->where('hall_name', $hall_name)->value('rows');
-        $seats = DB::table('halls')->where('hall_name', $hall_name)->value('seats_per_row');
         
-        return response([$row, $seats, $session_name], 200);
+        $tickets_obj = DB::table($request->input('table_tickets'))->get();
+        
+        $row = 1;
+        $seats =1;
+        $i = 0;
+                                       
+        foreach ($tickets_obj as $seat) {
+            
+            $rowVar = $seat->row;
+            if($rowVar > $row)  $row = $row +1;   // количество рядов в зале  
+            $i++;           
+        }        
+        $seats = $i / $row;     // количество мест в ряду
+    
+        
+       return response([$row, $seats, $session_name], 200);
     }
 
 
@@ -436,7 +445,7 @@ class TodoController extends Controller
                 'active' => false   // остановить продажу билетов для всех залов 
             ]);
 
-            $status_msge = "Продажи билетов успешно приостановленны";
+            $status_msge = "Продажи билетов успешно приостановлены";
         }
         if ($sale_status === true) {
             DB::table('halls')

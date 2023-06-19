@@ -38,8 +38,9 @@ export function findNodeByInnerHTML(nodelist, innerHTML){ // функция по
     
   }
 
-  export function addSessionFilmInfo(filmSessionInfo, arrayObj, rows, seats_per_row) { // ВСТАВКА ЭЛЕМЕНТА "Билеты на сеанс"    
+  export function addSessionFilmInfo(filmSessionInfo, arrayObj, rows, seats_per_row) { // ВСТАВКА ЭЛЕМЕНТА "Билеты на сеанс"
     
+    const length = arrayObj[0].length;
     let htm_element = '';
     let count = 0;
     let vip_sold = 0;       // продано vip-билетов

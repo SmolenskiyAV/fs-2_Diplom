@@ -23,6 +23,7 @@
         "vite": "^4.0.0"
     },
     "dependencies": {
+        "moment": "^2.29.4",
         "react-dom": "^18.2.0"
     }
 }

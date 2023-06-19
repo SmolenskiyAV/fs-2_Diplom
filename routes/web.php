@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TodoController;
+use App\Http\Controllers\ClientController;
 use App\Models\Film;
 use App\Models\Hall;
 
@@ -13,9 +14,31 @@ Route::get('/', function () {
     return view('/ToDo/home');
 })->name('home');
 
+
+
+
 Route::get('/admin', function () {
     return view('/layouts/app_admin', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
 })->name('admin_main');
+
+
+Route::get('/client', function () {
+    return view('/layouts/app_client', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
+})->name('client_main');
+
+Route::get('/hall', function () {
+    return view('/inc/app_hall', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
+})->name('client_hall');
+
+Route::get('/payment', function () {
+    return view('/inc/app_payment', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
+})->name('client_payment');
+
+Route::get('/ticket', function () {
+    return view('/inc/app_ticket', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
+})->name('client_ticket');
+
+
 
 Route::get('/todo/list', [TodoController::class, 'show'])->name('list');
 
@@ -34,13 +57,6 @@ Route::post('/todo/{id}/update', [TodoController::class, 'updateSubmit'])->name(
 
 Route::get('/todo/{id}/delete', [TodoController::class, 'delete'])->name('delete');
 
-/*
-Route::get('/todo',[\App\Http\Controllers\TodoController::class, 'add']);
-Route::post('/todo/create',[\App\Http\Controllers\TodoController::class, 'create']);
-
-Route::get('/todo/{task}', [\App\Http\Controllers\TodoController::class, 'edit']);
-Route::post('/todo/{task}', [\App\Http\Controllers\TodoController::class, 'update']);
-*/
 
 route::name('user.')->group(function () {
     route::view('/ToDo/private', '/ToDo/private')->middleware('auth')->name('private');
@@ -96,3 +112,13 @@ Route::post('/infoFilmSession', [TodoController::class, 'infoFilmSession'])->nam
 Route::post('/changeFilmSession', [TodoController::class, 'changeFilmSession'])->name('changeFilmSession');
 
 Route::get('/changeSaleStatus', [TodoController::class, 'changeSaleStatus'])->name('changeSaleStatus');
+
+Route::get('/btnDatePush/{sessions_date}', [ClientController::class, 'btnDatePush'])->name('btnDatePush');
+Route::get('/btnTimePush/{film_start}/film/{film_name}/hall/{hall_name}/tickets/{tickets_table}', [ClientController::class, 'btnTimePush'])->name('btnTimePush');
+
+Route::get('/chooseTickets', function (Request $request) {
+
+    $arr = $request->input('arr');
+    
+    return view('/inc/app_payment', ['choose_array' => $arr]);
+})->name('chooseTickets');
