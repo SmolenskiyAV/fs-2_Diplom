@@ -13,7 +13,7 @@
 
 <body>
     <header class="page-header">
-        <h1 class="page-header__title">Идём<span>в</span>кино</h1>
+    <a href="{{route('client_main')}}" style="text-decoration: none"><h1 class="page-header__title">Идём<span>в</span>кино</h1></a>
     </header>
     @php
         if (empty($film_start)) $film_start = '';
@@ -21,14 +21,16 @@
         if (empty($hall_name)) $hall_name = '';
         if (empty($tickets_table)) {
             $tickets_table = '';
-            $render_seats = '';        
+            $render_seats = '';
+            $rows = 0;
+            $film_date ='';                 
         } else {
             $tickets_obj = DB::table($tickets_table)->get();
             
             $rows = 1;
             $seats_per_row =1;
             $i = 0;
-            $counter = 0;
+            $counter = 1;
                                 
             foreach ($tickets_obj as $seat) {                
                 $rowVar = $seat->row;
@@ -72,16 +74,16 @@
                                 @endphp
                                                         
                                 @if (($type === 1) && ($sold === 0))
-                                    <span class="buying-scheme__chair buying-scheme__chair_standart" data-row="{{ $r }}" data-seat="{{ $s }}" data-type=1 data-selected='' style="padding: 10px; cursor: pointer"></span>
+                                    <span class="buying-scheme__chair buying-scheme__chair_standart" data-row="{{ $r }}" data-seat="{{ $s }}" data-seatnumber="{{ $counter }}" data-type=1 data-selected='' style="padding: 10px; cursor: pointer"></span>
                                 @endif
                                 @if (($type === 2) && ($sold === 0))
-                                    <span class="buying-scheme__chair buying-scheme__chair_vip" data-row="{{ $r }}" data-seat="{{ $s }}" data-type=2 data-selected='' style="padding: 10px; cursor: pointer"></span>
+                                    <span class="buying-scheme__chair buying-scheme__chair_vip" data-row="{{ $r }}" data-seat="{{ $s }}" data-seatnumber="{{ $counter }}" data-type=2 data-selected='' style="padding: 10px; cursor: pointer"></span>
                                 @endif
                                 @if ($sold === 1)
-                                    <span class="buying-scheme__chair buying-scheme__chair_taken" data-row="{{ $r }}" data-seat="{{ $s }}" data-type=4 style="padding: 10px; cursor: pointer"></span>
+                                    <span class="buying-scheme__chair buying-scheme__chair_taken" data-row="{{ $r }}" data-seat="{{ $s }}" data-seatnumber="{{ $counter }}" data-type=4 style="padding: 10px; cursor: pointer"></span>
                                 @endif
                                 @if ($type === 0)
-                                    <span class="buying-scheme__chair buying-scheme__chair_disabled" data-row="{{ $r }}" data-seat="{{ $s }}" data-type=0 style="padding: 10px"></span>
+                                    <span class="buying-scheme__chair buying-scheme__chair_disabled" data-row="{{ $r }}" data-seat="{{ $s }}" data-seatnumber="{{ $counter }}" data-type=0 style="padding: 10px"></span>
                                 @endif
                                 
                                 @php
@@ -106,6 +108,11 @@
 
             <form action="{{ route('chooseTickets') }}" method="get" accept-charset="utf-8">
                 @csrf
+                <input type="hidden" name="film_name" value="{{ $film_name }}">
+                <input type="hidden" name="hall_name" value="{{ $hall_name }}">
+                <input type="hidden" name="film_date" value="{{ $film_date }}">
+                <input type="hidden" name="session_time" value="{{ $film_start }}">
+                <input type="hidden" name="total_cost" value="">
                 <input type="hidden" name="arr" value="">
                 <button class="acceptin-button" type="submit" style="cursor: pointer">Забронировать</button>
             </form>

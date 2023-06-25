@@ -20,7 +20,7 @@ class FilmTicketsCreate // класс создания/удаления табл
             $table->integer('row') ->nullable(false);              // ряд в зале, к которому принадлежит место
             $table->integer('number') ->nullable(false);           // номер места в ряду
             $table->integer('type') ->default(0);             // тип места: 1-обычное; 2-VIP
-            $table->integer('qr-code') ->default(0);          // QR-код проданного билета
+            $table->string('qr-code') ->default(0);          // QR-код проданного билета
             $table->boolean('sold') ->default(false);         // маркер "билет продан"          
         });
     }

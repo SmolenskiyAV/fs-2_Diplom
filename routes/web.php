@@ -23,7 +23,8 @@ Route::get('/admin', function () {
 
 
 Route::get('/client', function () {
-    return view('/layouts/app_client', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
+    $hall_blocked = false;     // маркер
+    return view('/layouts/app_client', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate(), 'hall_blocked' => $hall_blocked]);
 })->name('client_main');
 
 Route::get('/hall', function () {
@@ -114,11 +115,18 @@ Route::post('/changeFilmSession', [TodoController::class, 'changeFilmSession'])-
 Route::get('/changeSaleStatus', [TodoController::class, 'changeSaleStatus'])->name('changeSaleStatus');
 
 Route::get('/btnDatePush/{sessions_date}', [ClientController::class, 'btnDatePush'])->name('btnDatePush');
-Route::get('/btnTimePush/{film_start}/film/{film_name}/hall/{hall_name}/tickets/{tickets_table}', [ClientController::class, 'btnTimePush'])->name('btnTimePush');
+Route::get('/btnTimePush/{film_start}/film/{film_name}/hall/{hall_name}/date/{film_date}/tickets/{tickets_table}', [ClientController::class, 'btnTimePush'])->name('btnTimePush');
 
 Route::get('/chooseTickets', function (Request $request) {
 
-    $arr = $request->input('arr');
+    $film_name = $request->input('film_name');
+    $hall_name = $request->input('hall_name');
+    $film_date = $request->input('film_date');
+    $session_time = $request->input('session_time');
+    $total_cost = $request->input('total_cost');
+    $arr = json_decode($request->input('arr'));
     
-    return view('/inc/app_payment', ['choose_array' => $arr]);
+    return view('/inc/app_payment', ['choose_array' => $arr, 'film_name' => $film_name, 'hall_name' => $hall_name, 'film_date' => $film_date, 'session_time' => $session_time, 'total_cost' => $total_cost]);
 })->name('chooseTickets');
+
+Route::post('/getTicketCode', [ClientController::class, 'getTicketCode'])->name('getTicketCode');

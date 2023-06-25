@@ -17,6 +17,7 @@
     $actualFilms = [];
     $actualHalls = [];
     $film_start_result =[];
+    
     if (empty($sessions_date)) {
         $currentPlaneDate = '';
     } else $currentPlaneDate = $sessions_date;
@@ -58,7 +59,7 @@
 
 <body>
     <header class="page-header">
-        <h1 class="page-header__title">Идём<span>в</span>кино</h1>
+    <h1 class="page-header__title">Идём<span>в</span>кино</h1>
     </header>
   
     <nav class="page-nav">
@@ -192,6 +193,10 @@
         $actualHalls = array_unique($actualHalls);   // убираем повторяющиеся залы               
     @endphp    
 
+    @if($hall_blocked)
+        <h1 class="movie-seances__hall-title" style="font-weight: normal; color:brown; margin-left: 50px"><span style="font-weight: normal; color:brown">В Зале </span> {{ $hall }} ПРОДАЖА БИЛЕТОВ ПРИОСТАНОВЛЕНА!!!</h1>
+    @endif
+
     <main>
         @foreach($actualFilms as $el)
             @php
@@ -227,12 +232,12 @@
                         sort($film_start_result);                               // сортируем кнопки "время сеанса" по возрастанию
                     @endphp
                     <div class="movie-seances__hall">
-                        <h3 class="movie-seances__hall-title"><span style="font-weight: normal">Зал </span> {{ $el1 }}</h3>
+                        <h3 class="movie-seances__hall-title"><span style="font-weight: normal">Зал </span> {{ $el1 }}</h3>                        
                         <ul class="movie-seances__list">                 
                         
                         @foreach($film_start_result as $film_start) 
                             @if(DB::table($current_ticket_table)->where('film_start', $film_start)->value('film_name') === $el)
-                                <li class="movie-seances__time-block"><a class="movie-seances__time" href="{{ route('btnTimePush', [$film_start, $el, $el1, DB::table($current_ticket_table)->where('film_start', $film_start)->value('film_tickets')]) }}">{{ $film_start }}</a></li>
+                                <li class="movie-seances__time-block"><a class="movie-seances__time" href="{{ route('btnTimePush', [$film_start, $el, $el1, $currentPlaneDate, DB::table($current_ticket_table)->where('film_start', $film_start)->value('film_tickets')]) }}">{{ $film_start }}</a></li>
                             @endif
                         @endforeach                    
                         </ul>
