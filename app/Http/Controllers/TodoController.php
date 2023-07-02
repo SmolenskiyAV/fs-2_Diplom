@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Todo;
 use App\Models\Hall;
 use Illuminate\Http\Request;
-use App\Http\Requests\CreateRequest;
 use App\Http\Requests\CreateHallRequest;
 use App\Http\Requests\CreateFilmRequest;
 use App\Models\Film;
@@ -18,37 +16,24 @@ use App\Models\HallSessionsPlan;
 use App\Models\HallSessionsPlaneCreate;
 use App\Models\FilmTicketsCreate;
 use App\Models\FilmTickets;
+use Illuminate\Support\Facades\Auth;
 
-use Illuminate\Support\Facades\Storage;
-use Mockery\Undefined;
 
 class TodoController extends Controller
 {
     public function index()
     {
 
-    }
-
-    public function add(CreateRequest $request)
-    {
-        //dd($request->input('task'));
-        $task = new Todo();
-        $task->name = $request->input('name');
-        $task->task = $request->input('task');
-
-        $task->save();
-
-        return redirect()->route('home')->with('success', 'Новая задача успешно добавлена');
-    }
-
-
+    }    
 
     public function addHall(CreateHallRequest $request) // ДОБАВИТЬ ЗАЛ
     {
-    //dd($request->input('hall_name'));
+        $email = Auth::user()->email; // получаем адрес текущего авторизованного админа
+
         $hall_name = $request->input('hall_name');
         $hall = new Hall();
         $hall->hall_name = $hall_name;
+        $hall->admin_updater = $email;
         
         $hall->save();                          // создание записи в таблице "зал"
 
@@ -121,6 +106,7 @@ class TodoController extends Controller
         $rows = $request->input('rows');
         $seats_per_row = $request->input('seats_per_row');
         $chair_standart_default = $rows * $seats_per_row;
+        $email = Auth::user()->email; // получаем адрес текущего авторизованного админа
 
         if (($chair_standart_default === 0) || ($rows > 40) || ($seats_per_row > 50)) {
             return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]) ->with('baddata', 'Новый размер зала ' . $hall_name . ' не может быть определён! Неверные параметры.');
@@ -131,7 +117,8 @@ class TodoController extends Controller
             'rows' =>$rows,
             'vip_seats' =>0,
             'usual_seats' =>$chair_standart_default,
-            'locked_seats' =>0
+            'locked_seats' =>0,
+            'admin_updater' => $email
         ]);  
         
         $hall = Hall::where('hall_name', $hall_name)->first();
@@ -227,6 +214,7 @@ class TodoController extends Controller
         $extension = $request->poster->extension(); // получить расширение файла
         $film_country = $request->input('film_country');
         $film_description = $request->input('film_description');
+        $email = Auth::user()->email; // получаем адрес текущего авторизованного админа
         
         $poster_name = $film_name . '_poster';
         $poster_name = preg_replace('/[[:punct:]]|[\s\s+]/', '_', $poster_name);  //заменяем пробелы и спецсимволы из имени постера на "_";
@@ -244,6 +232,7 @@ class TodoController extends Controller
         $film->poster_path = '/storage/images/films/' . "$poster_name.$extension";
         $film->description = $film_description;
         $film->country_source = $film_country;
+        $film->admin_updater = $email;
         
         $film->save();                          // создание записи в таблице "фильм"
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"        
@@ -366,6 +355,7 @@ class TodoController extends Controller
     public function changeFilmSession(Request $request) // ВНЕСТИ ИЗМЕНЕИЯ В СЕТКУ СЕАНСОВ
     {       
         $request_array = json_decode(($request->input('sessionsarray')), true);
+        $email = Auth::user()->email; // получаем адрес текущего авторизованного админа
                 
         foreach($request_array as $session_el) {
 
@@ -402,7 +392,8 @@ class TodoController extends Controller
                 $hall_session_film->film_tickets = $full_table_name;
                 $hall_session_film->film_start = $session_time;
                 $hall_session_film->film_duration = DB::table('films')->where('film_name', $film_name)->value('film_duration');
-
+                $hall_session_film->admin_updater = $email;
+               
                 $hall->hallSessionsPlan()->save($hall_session_film);    // создание записи в зависимой таблице "План сеансов на день" ("сеанс" -> "зал")
 
                 DB::table('films')->where('film_name', $film_name)->increment('session_films', 1);    // увеличиваем количество действующих сеансов фильма для данного зала на 1 
@@ -459,51 +450,5 @@ class TodoController extends Controller
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"
         
         return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', $status_msge);
-    }
-
-
-
-
-
-
-
-    public function show()
-    {
-        //dd(Todo::all());
-        return view('/ToDo/list', ['data' => Todo::/*all()*/paginate()]);
-
-    }
-
-    public function edit($id)
-    {
-        return view('/ToDo/edit', ['data' => Todo::find($id)]);
-    }
-
-    public function update($id)
-    {
-        return view('/ToDo/update', ['data' => Todo::find($id)]);
-    }
-
-    public function updateSubmit($id, CreateRequest $request)
-    {
-        //dd($request->input('task'));
-        $task = Todo::find($id);
-        $task->name = $request->input('name');
-        $task->task = $request->input('task');
-
-        $task->save();
-
-        return redirect()->route('edit', $id)->with('success', 'Задача успешно обновлена');
-    }
-
-    public function delete($id)
-    {
-        Todo::find($id)->delete();
-        return redirect()->route('list')->with('success', 'Задача успешно удалена!');
-    }
-
-    public function destroy(Todo $todo)
-    {
-        //
-    }
+    }    
 }

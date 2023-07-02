@@ -10,16 +10,23 @@ use App\Models\Film;
 use App\Models\Hall;
 
 Route::get('/', function () {
-    //return 'welcome';
-    return view('/ToDo/home');
+    $hall_blocked = false;     // маркер
+    return view('/layouts/app_client', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate(), 'hall_blocked' => $hall_blocked]);
 })->name('home');
-
-
 
 
 Route::get('/admin', function () {
     return view('/layouts/app_admin', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
-})->name('admin_main');
+})->name('admin_main')->middleware('auth');
+
+Route::get('/login', function () {
+    return view('/auth/app_login');
+})->name('admin_login');
+
+Route::get('/register', function () {
+    return view('/auth/app_register');
+})->name('admin_register');
+
 
 
 Route::get('/client', function () {
@@ -41,35 +48,19 @@ Route::get('/ticket', function () {
 
 
 
-Route::get('/todo/list', [TodoController::class, 'show'])->name('list');
-
-Route::get('/todo/create', function () {
-    //return view('welcome');
-    return view('/ToDo/create');
-})->name('create');
-
-Route::post('/todo/create/submit',[TodoController::class, 'add'])->name('submit');
-
-Route::get('/todo/{id}', [TodoController::class, 'edit'])->name('edit');
-
-Route::get('/todo/{id}/update', [TodoController::class, 'update'])->name('update');
-
-Route::post('/todo/{id}/update', [TodoController::class, 'updateSubmit'])->name('updateSubmit');
-
-Route::get('/todo/{id}/delete', [TodoController::class, 'delete'])->name('delete');
-
-
 route::name('user.')->group(function () {
-    route::view('/ToDo/private', '/ToDo/private')->middleware('auth')->name('private');
+   
+    route::view('/layouts/admin', '/layouts/admin')->middleware('auth')->name('private');
 
-    Route::get('/auth/login', function () {
+    Route::get('/auth/app_login', function () { 
         if(Auth::check()) {
             return redirect(route('user.private'));
         }
-        return view('/auth/login');
+        
+        return view('/auth/app_login');
     })->name('login');
 
-    route::post('/auth/login', [\App\Http\Controllers\LoginController::class, 'login']);
+    route::post('/auth/app_login', [\App\Http\Controllers\LoginController::class, 'login']);  
 
     route::post('/auth/register/changePass/{email}', [RegisterController::class, 'updatePassword'])->name('updatePassword');
 
@@ -78,20 +69,22 @@ route::name('user.')->group(function () {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            return redirect(route('home'));
+            
+            return redirect(route('admin_login'));
         }
         return redirect(route('user.login'))->withErrors( // ..если попытка выхода провалилась - редирект и вывод сообщ. об ошибке
             'LogoutError!!!');
     })->name('logout');
 
-    Route::get('/auth/register', function () {
+    Route::get('/auth/app_register', function () {  
         if(Auth::check()|| Auth::viaRemember()) {
             return redirect(route('user.private'));
         }
-        return view('/auth/register');
+        
+        return view('/auth/app_register');
     })->name('register');
 
-    Route::post('/auth/register', [RegisterController::class, 'register']);
+    Route::post('/auth/app_register', [RegisterController::class, 'register']); 
 });
 
 Route::post('/addHall', [TodoController::class, 'addHall'])->name('addHall');
@@ -114,7 +107,7 @@ Route::post('/changeFilmSession', [TodoController::class, 'changeFilmSession'])-
 
 Route::get('/changeSaleStatus', [TodoController::class, 'changeSaleStatus'])->name('changeSaleStatus');
 
-Route::get('/btnDatePush/{sessions_date}', [ClientController::class, 'btnDatePush'])->name('btnDatePush');
+Route::get('/btnDatePush/{sessions_date}/start_element/{start_element}', [ClientController::class, 'btnDatePush'])->name('btnDatePush');
 Route::get('/btnTimePush/{film_start}/film/{film_name}/hall/{hall_name}/date/{film_date}/tickets/{tickets_table}', [ClientController::class, 'btnTimePush'])->name('btnTimePush');
 
 Route::get('/chooseTickets', function (Request $request) {

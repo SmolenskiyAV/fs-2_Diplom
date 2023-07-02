@@ -10,14 +10,20 @@
     @vite(['resources/css/admin/styles.scss'])
 </head>
 
+@php    
+    $email = Auth::user()->email; // получаем адрес текущего авторизованного админа    
+@endphp
+
 <body>
 <header class="page-header">
     <h1 class="page-header__title">Идём<span>в</span>кино</h1>
     <span class="page-header__subtitle">Администраторррская</span>
+    <h3 style="margin-top: 20px;  margin-bottom: 10px;" class="conf-step__title">админ<span>:</span>{{$email}}</h3>
+    <a style="text-decoration: none;" href="{{route('user.logout')}}"><h2 class="conf-step__title" style="color:blue;">выйти</h2></a>
 </header>
 
 <main class="conf-steps">
-    @php    
+    @php         
         $hall_name_cfg ='';
         $hall_rows_cfg = 0;
         $hall_seats_per_row_cfg =0;

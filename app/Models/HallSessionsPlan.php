@@ -10,7 +10,7 @@ class HallSessionsPlan extends Model    // МОДЕЛЬ таблицы "План
     use HasFactory;
 
     private string $name;
-    public $timestamps = false;
+    public $timestamps = true;
 
 			
 	public static function relation($sessions_date, $hall_name)

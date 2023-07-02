@@ -14,7 +14,7 @@ class RegisterController extends Controller
         if(Auth::check()){
             return redirect(route('user.private'));
         }
-            //return dd($request); // Точка контроля
+           
         $validateFields = $request->validate([
         'email' => 'required|email',
         'password' => 'required',
@@ -26,11 +26,7 @@ class RegisterController extends Controller
             ]);
         }
 
-            //return dd($validateFields); // Точка контроля
-
         $user = \App\Models\User::create($validateFields);
-
-            //return dd($user); // Точка контроля
 
         if($user){
             Auth::login($user);
@@ -47,8 +43,6 @@ class RegisterController extends Controller
         $currentId = DB::table('users')->where('email', $email)->value('id'); // поиск в БД id строки, относящейся к текущему пользователю
 
         $user = \App\Models\User::find($currentId);
-
-            //return dd($user->password); // Точка контроля
 
         if($user) {
             $user->password = $request->input('password');

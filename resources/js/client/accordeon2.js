@@ -1,6 +1,3 @@
-import {
-  findNodeByInnerHTML, planeFormation, addNewSessionFilm, addSessionFilmInfo,
-} from './additions2';
 
 const Nav = document.querySelector('nav'); //лента навигации по дням сеансов
 

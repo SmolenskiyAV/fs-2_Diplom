@@ -17,6 +17,7 @@
     $actualFilms = [];
     $actualHalls = [];
     $film_start_result =[];
+    if(!isset($start_element)) $start_element = 0;    
     
     if (empty($sessions_date)) {
         $currentPlaneDate = '';
@@ -54,33 +55,51 @@
     }
     
     usort($actualSessionsDays, "compareByTimeStamp");  // сортируем массив дат по возрастанию
-    
+
+    $actualSessionsDaysLenth = count($actualSessionsDays);
+    if (($actualSessionsDaysLenth - (int)$start_element) > 4)
+    {
+        $current_size = 5; 
+    } else {
+        $current_size = $actualSessionsDaysLenth;
+    }     
 @endphp
 
 <body>
     <header class="page-header">
-    <h1 class="page-header__title">Идём<span>в</span>кино</h1>
+    <a href="{{route('client_main')}}" style="text-decoration: none"><h1 class="page-header__title">Идём<span>в</span>кино</h1></a>
     </header>
   
     <nav class="page-nav">
         @php
             $today_obj = getdate();
             $today_month = $today_obj['mon'];
+            $today_day = $today_obj['mday'];
 
-            if ((int) $today_month < 10) $today_month = str_pad($today_month, 2, "0", STR_PAD_LEFT);    // если месяц = один разряд, дополняем его нулём        
-            $today = $today_obj['year'] . '-' . $today_month . '-' . $today_obj['mday'];
+            if ((int) $today_month < 10) $today_month = str_pad($today_month, 2, "0", STR_PAD_LEFT);    // если месяц = один разряд, дополняем его нулём
+            if ((int) $today_day < 10) $today_day = str_pad($today_day, 2, "0", STR_PAD_LEFT);    // если день = один разряд, дополняем его нулём     
+            $today = $today_obj['year'] . '-' . $today_month . '-' . $today_day;
+
+            if(in_array($today, $actualSessionsDays)){  // если на сегодня сеанс/сы есть - отображаем
+                $key = array_search($today, $actualSessionsDays);
+                $start2_element = intdiv($key, 5);             
+            } else {                                // если сеансов на сегодня нет, переходим в начало списка дат
+                $today = $actualSessionsDays[0];
+                $start2_element = 0;
+            }
         @endphp
-        <a class="page-nav__day page-nav__day_today" href="{{ route('btnDatePush', $today) }}">
+        <a class="page-nav__day page-nav__day_today" href="{{ route('btnDatePush', [$today, $start2_element]) }}">
         <span class="page-nav__day-week"></span><span class="page-nav__day-number"></span><span>&#160;</span><span></span>
         </a>    
 
-        @foreach($actualSessionsDays as $el)
+        
+        @for ($i = (int)$start_element; $i < $current_size; $i++)
             @php
-                $time = strtotime($el);     //Перевод даты в timestamp
+                $time = strtotime($actualSessionsDays[$i]);     //Перевод даты в timestamp
                 $day_week_number = date('w', $time);
-                $actual_day_number = (int) mb_strimwidth($el, 8, 2);
+                $actual_day_number = (int) mb_strimwidth($actualSessionsDays[$i], 8, 2);
                 $month_number = date('m', $time);
-
+               
                 switch ($day_week_number) {
                     case 1:
                         $actual_day = "Пн";
@@ -143,35 +162,40 @@
                         $actual_month = "Дек";
                         break;
                 }
-
+                
             @endphp
             @if ($currentPlaneDate === '')
-                @if ($loop->first)
+                @if ($i === (int)$start_element)
                     @php
-                    $currentPlaneDate = $el;
+                    $currentPlaneDate = $actualSessionsDays[$i];
                     @endphp
-                    <a class="page-nav__day page-nav__day_chosen" href="{{ route('btnDatePush', $currentPlaneDate) }}" style='pointer-events: none; cursor: pointer'>
+                    <a class="page-nav__day page-nav__day_chosen" href="{{ route('btnDatePush', [$currentPlaneDate, $start_element]) }}" style='pointer-events: none; cursor: pointer'>
                         <span class="page-nav__day-week" style='cursor: pointer'>{{ $actual_day }}</span><span class="page-nav__day-number" data-planedate="{{ $currentPlaneDate }}">{{ $actual_day_number }}</span><span style='pointer-events: none;'>{{ $actual_month }}</span>
                     </a>
                     @continue
                 @endif
-                <a class="page-nav__day" href="{{ route('btnDatePush', $el) }}" style='pointer-events: none; cursor: pointer'>
-                    <span class="page-nav__day-week" style='cursor: pointer'>{{ $actual_day }}</span><span class="page-nav__day-number" data-planedate="{{ $el }}">{{ $actual_day_number }}</span><span style='pointer-events: none;'>{{ $actual_month }}</span>
+                <a class="page-nav__day" href="{{ route('btnDatePush', [$actualSessionsDays[$i], $start_element]) }}" style='pointer-events: none; cursor: pointer'>
+                    <span class="page-nav__day-week" style='cursor: pointer'>{{ $actual_day }}</span><span class="page-nav__day-number" data-planedate="{{ $actualSessionsDays[$i] }}">{{ $actual_day_number }}</span><span style='pointer-events: none;'>{{ $actual_month }}</span>
                 </a>
             @else
-                @if ($currentPlaneDate === $el)
-                    <a class="page-nav__day page-nav__day_chosen" href="{{ route('btnDatePush', $currentPlaneDate) }}" style='pointer-events: none; cursor: pointer'>
+                @if ($currentPlaneDate === $actualSessionsDays[$i])
+                    <a class="page-nav__day page-nav__day_chosen" href="{{ route('btnDatePush', [$currentPlaneDate, $start_element]) }}" style='pointer-events: none; cursor: pointer'>
                         <span class="page-nav__day-week" style='pointer-events: none; cursor: pointer'>{{ $actual_day }}</span><span class="page-nav__day-number" data-planedate="{{ $currentPlaneDate }}">{{ $actual_day_number }}</span style='pointer-events: none;'><span>{{ $actual_month }}</span>
                     </a>
                     @continue
                 @endif
-                <a class="page-nav__day" href="{{ route('btnDatePush', $el) }}" style='cursor: pointer'>
-                    <span class="page-nav__day-week" style='cursor: pointer'>{{ $actual_day }}</span><span class="page-nav__day-number" data-planedate="{{ $el }}">{{ $actual_day_number }}</span><span style='pointer-events: none;'>{{ $actual_month }}</span>
+                <a class="page-nav__day" href="{{ route('btnDatePush', [$actualSessionsDays[$i], $start_element]) }}" style='cursor: pointer'>
+                    <span class="page-nav__day-week" style='cursor: pointer'>{{ $actual_day }}</span><span class="page-nav__day-number" data-planedate="{{ $actualSessionsDays[$i] }}">{{ $actual_day_number }}</span><span style='pointer-events: none;'>{{ $actual_month }}</span>
                 </a>
-            @endif
-        @endforeach    
-        <a class="page-nav__day page-nav__day_next" href="#">
-        </a>
+            @endif           
+        @endfor  
+
+        @if($current_size == 5)                
+            @php
+                $next_element = (int)$start_element + 5;             
+            @endphp
+            <a class="page-nav__day page-nav__day_next" href="{{ route('btnDatePush', [$actualSessionsDays[$next_element], $next_element]) }}"></a>
+        @endif
     </nav>            
     
     @php

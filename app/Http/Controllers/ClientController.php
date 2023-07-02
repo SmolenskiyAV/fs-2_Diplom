@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class ClientController extends Controller
 {
-    public function btnDatePush($sessions_date)   // НАВИГАЦИЯ ПО КНОПКАМ ДАТЫ СЕАНСОВ
-    {           
+    public function btnDatePush($sessions_date, $start_element)   // НАВИГАЦИЯ ПО КНОПКАМ ДАТЫ СЕАНСОВ
+    {          
         $hall_blocked = false;     // маркер
-        return view('/layouts/app_client', ['dataHalls' => Hall::paginate(), 'sessions_date' => $sessions_date, 'dataFilms' => Film::paginate(), 'hall_blocked' => $hall_blocked]);
+        return view('/layouts/app_client', ['dataHalls' => Hall::paginate(), 'sessions_date' => $sessions_date, 'dataFilms' => Film::paginate(), 'hall_blocked' => $hall_blocked, 'start_element' => $start_element]);
     }
 
     public function btnTimePush($film_start, $film_name, $hall_name, $film_date, $tickets_table)   // НАВИГАЦИЯ ПО КНОПКАМ ВРЕМЯ СЕАНСОВ
@@ -31,8 +31,7 @@ class ClientController extends Controller
         $session_time = $request->input('session_time');
         
         $arr = json_decode($request->input('arr'));
-        //dd(count($arr));
-
+        
         if (DB::table('halls')->where('hall_name', $hall_name)->value('active')) {
             $codeContents = $seats_list . $film_name . $hall_name . $session_time . time(); // стрОковое значение QR-кода
             $codeContents = preg_replace('/[[:punct:]]|[\s\s+]/', '', $codeContents);  //заменяем пробелы и спецсимволы из имени файла на "";
