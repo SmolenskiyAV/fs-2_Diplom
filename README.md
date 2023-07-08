@@ -66,7 +66,7 @@
 
 
 ## Запуск проекта:
-- После git-клонирования (`git clone https://github.com/SmolenskiyAV/fs-2_Diplom.gitD`), открыть проект в IDE (у меня это Visual Studio Code ver.1.79.2);
+- После git-клонирования (`git clone https://github.com/SmolenskiyAV/fs-2_Diplom`), открыть папку проекта в IDE (у меня это Visual Studio Code ver.1.79.2). Проконтролировать запуск Vite: должно появиться сообщение, типа `vite started at http://localhost:4000`.  
 - В терминале последовательно запустить:  
   - `npm -install`
   - `php artisan key:generate`
