@@ -1,0 +1,87 @@
+{
+  "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/screen.png": {
+    "file": "assets/screen-6439a0e0.png",
+    "src": "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/screen.png"
+  },
+  "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/border-top.png": {
+    "file": "assets/border-top-6edae432.png",
+    "src": "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/border-top.png"
+  },
+  "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/hint.png": {
+    "file": "assets/hint-d432e7ad.png",
+    "src": "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/hint.png"
+  },
+  "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/border-bottom.png": {
+    "file": "assets/border-bottom-0e6b9fc1.png",
+    "src": "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/border-bottom.png"
+  },
+  "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/background.jpg": {
+    "file": "assets/background-025137ea.jpg",
+    "src": "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/client/background.jpg"
+  },
+  "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/admin/switch.png": {
+    "file": "assets/switch-08ddc062.png",
+    "src": "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/admin/switch.png"
+  },
+  "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/admin/trash-sprite.png": {
+    "file": "assets/trash-sprite-26d482f7.png",
+    "src": "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/admin/trash-sprite.png"
+  },
+  "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/admin/green-pattern.png": {
+    "file": "assets/green-pattern-f871867d.png",
+    "src": "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/admin/green-pattern.png"
+  },
+  "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/admin/background.jpg": {
+    "file": "assets/background-3cd5fb3a.jpg",
+    "src": "../../Part-12/HOMEWORKs/LRV-18_2.ToDo/storage/app/public/images/admin/background.jpg"
+  },
+  "resources/css/admin/normalize.css": {
+    "file": "assets/normalize-1d9107b9.css",
+    "src": "resources/css/admin/normalize.css",
+    "isEntry": true
+  },
+  "resources/css/client/normalize.css": {
+    "file": "assets/normalize-325f442b.css",
+    "src": "resources/css/client/normalize.css",
+    "isEntry": true
+  },
+  "resources/css/client/styles.scss": {
+    "file": "assets/styles-9ae7f498.css",
+    "src": "resources/css/client/styles.scss",
+    "isEntry": true
+  },
+  "resources/css/admin/styles.scss": {
+    "file": "assets/styles-4a487e43.css",
+    "src": "resources/css/admin/styles.scss",
+    "isEntry": true
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-4474e91f.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "__commonjsHelpers-725317a4.js": {
+    "file": "assets/_commonjsHelpers-725317a4.js"
+  },
+  "resources/js/admin/accordeon.js": {
+    "file": "assets/accordeon-aa1b3437.js",
+    "src": "resources/js/admin/accordeon.js",
+    "isEntry": true
+  },
+  "resources/js/admin/demo.js": {
+    "file": "assets/demo-04d6b8a0.js",
+    "src": "resources/js/admin/demo.js",
+    "isEntry": true,
+    "imports": [
+      "__commonjsHelpers-725317a4.js"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-4769b11f.js",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "__commonjsHelpers-725317a4.js"
+    ]
+  }
+}
