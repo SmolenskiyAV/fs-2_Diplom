@@ -42,7 +42,9 @@
         }
     }
     
-    $actualSessionsDays = array_unique($temp_actualSessionsDays);   // убираем повторяющиеся даты    
+    if (isset($temp_actualSessionsDays)) {
+        $actualSessionsDays = array_unique($temp_actualSessionsDays);   // убираем повторяющиеся даты    
+    }   
     
     function compareByTimeStamp($time1, $time2) // сортировка массива дат
     {
@@ -84,7 +86,7 @@
                 $key = array_search($today, $actualSessionsDays);
                 $start2_element = intdiv($key, 5);             
             } else {                                // если сеансов на сегодня нет, переходим в начало списка дат
-                $today = $actualSessionsDays[0];
+                if (isset($actualSessionsDays[0])) $today = $actualSessionsDays[0];
                 $start2_element = 0;
             }
         @endphp

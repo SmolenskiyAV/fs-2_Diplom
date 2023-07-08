@@ -64,9 +64,15 @@
 - БД Sqlite 3.31.1 (один файл "database.sqlite")
 - npm ver.9.5.0
 
-## Структура Базы Данных
 
-Запуск миграции: `php artisan migrate`  
+## Запуск проекта:
+- После git-клонирования (`git clone https://github.com/SmolenskiyAV/fs-2_Diplom.gitD`), открыть проект в IDE (у меня это Visual Studio Code ver.1.79.2);
+- В терминале последовательно запустить:  
+  - `npm -install`
+  - `php artisan key:generate`
+  - `php artisan migrate` (ответить `yes` на запрос создания базы).
+
+## Структура Базы Данных
 
 В БД проекта установлены три основные таблицы:
   - 'halls'-список всех созданных залов
@@ -104,9 +110,9 @@
 <span style="color: magenta">Постеры фильмов</span>, при создании записи в таблице *'films'* сохраняются в <span style="color: magenta">'public/storage/images/films'</span>.  
 При удалении записи о фильме в твблице *'films'*, относящий ся к этому фильму постер также удаляется.
 
-Вся логика конфигурирования залов/сеансов обрабатывается в контроллере *'app/Http/Controllers/TodoController.php'*.  
+Вся логика конфигурирования залов/сеансов обрабатывается в контроллере ***'app/Http/Controllers/TodoController.php'***.  
 
-Вся логика выбора/бронирования билетов обрабатывается в контроллере *'app/Http/Controllers/ClientController.php'*.  
+Вся логика выбора/бронирования билетов обрабатывается в контроллере ***'app/Http/Controllers/ClientController.php'***.  
 Все <span style="color: magenta">png-файлы QRcode-ов</span>, при бронировании сохраняются в <span style="color: magenta">'public/storage/images/client/QRcodes'</span>.  
 
 Шаблон(страница) конфигурирования *'resources/views/layouts/app_admin.blade.php'*.  

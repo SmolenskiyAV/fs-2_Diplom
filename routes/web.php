@@ -50,7 +50,7 @@ Route::get('/ticket', function () {
 
 route::name('user.')->group(function () {
    
-    route::view('/layouts/admin', '/layouts/admin')->middleware('auth')->name('private');
+    route::view('/layouts/app_admin', '/layouts/app_admin')->middleware('auth')->name('private');
 
     Route::get('/auth/app_login', function () { 
         if(Auth::check()) {
