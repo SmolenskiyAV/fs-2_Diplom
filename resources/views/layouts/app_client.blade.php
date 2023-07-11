@@ -12,59 +12,10 @@
 </head>
 
 @php
-    $poster_path = '';
-    $actualSessionsDays = [];
+    $poster_path = ''; 
     $actualFilms = [];
-    $actualHalls = [];
-    $film_start_result =[];
-    if(!isset($start_element)) $start_element = 0;    
-    
-    if (empty($sessions_date)) {
-        $currentPlaneDate = '';
-    } else $currentPlaneDate = $sessions_date;
-    
-    $allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");
-    $sessionsPlanTables = [];      // список всех таблиц планов сеансов в БД
-    $sessionsDayPlanTables = [];   // список всех таблиц сеансов в БД 
-    
-    foreach($allTables as $el) {
-
-        if (preg_match("/(_tickets)/", $el->name)){
-            $sessionsDayPlanTables[] = $el->name;
-            continue;
-        }
-        if (preg_match("/.+(\*).+/", $el->name)){
-            $sessionsPlanTables[] = $el->name;
-
-            $temporal_array = explode("*" , $el->name);
-            $planedHallDate = end($temporal_array);
-            $temp_actualSessionsDays[] = $planedHallDate;
-        }
-    }
-    
-    if (isset($temp_actualSessionsDays)) {
-        $actualSessionsDays = array_unique($temp_actualSessionsDays);   // убираем повторяющиеся даты    
-    }   
-    
-    function compareByTimeStamp($time1, $time2) // сортировка массива дат
-    {
-        if (strtotime($time1) > strtotime($time2))
-        return 1;
-        else if (strtotime($time1) < strtotime($time2)) 
-        return -1;
-        else
-        return 0;
-    }
-    
-    usort($actualSessionsDays, "compareByTimeStamp");  // сортируем массив дат по возрастанию
-
-    $actualSessionsDaysLenth = count($actualSessionsDays);
-    if (($actualSessionsDaysLenth - (int)$start_element) > 4)
-    {
-        $current_size = 5; 
-    } else {
-        $current_size = $actualSessionsDaysLenth;
-    }     
+    $actualHalls = [];   
+    $film_start_result =[];       
 @endphp
 
 <body>
@@ -73,23 +24,7 @@
     </header>
   
     <nav class="page-nav">
-        @php
-            $today_obj = getdate();
-            $today_month = $today_obj['mon'];
-            $today_day = $today_obj['mday'];
 
-            if ((int) $today_month < 10) $today_month = str_pad($today_month, 2, "0", STR_PAD_LEFT);    // если месяц = один разряд, дополняем его нулём
-            if ((int) $today_day < 10) $today_day = str_pad($today_day, 2, "0", STR_PAD_LEFT);    // если день = один разряд, дополняем его нулём     
-            $today = $today_obj['year'] . '-' . $today_month . '-' . $today_day;
-
-            if(in_array($today, $actualSessionsDays)){  // если на сегодня сеанс/сы есть - отображаем
-                $key = array_search($today, $actualSessionsDays);
-                $start2_element = intdiv($key, 5);             
-            } else {                                // если сеансов на сегодня нет, переходим в начало списка дат
-                if (isset($actualSessionsDays[0])) $today = $actualSessionsDays[0];
-                $start2_element = 0;
-            }
-        @endphp
         <a class="page-nav__day page-nav__day_today" href="{{ route('btnDatePush', [$today, $start2_element]) }}">
         <span class="page-nav__day-week"></span><span class="page-nav__day-number"></span><span>&#160;</span><span></span>
         </a>    
@@ -163,9 +98,9 @@
                     case '12':
                         $actual_month = "Дек";
                         break;
-                }
-                
+                }                
             @endphp
+
             @if ($currentPlaneDate === '')
                 @if ($i === (int)$start_element)
                     @php
@@ -196,13 +131,13 @@
             @php
                 $next_element = (int)$start_element + 5;             
             @endphp
-            <a class="page-nav__day page-nav__day_next" href="{{ route('btnDatePush', [$actualSessionsDays[$next_element], $next_element]) }}"></a>
+            @if(isset($actualSessionsDays[$next_element]))
+                <a class="page-nav__day page-nav__day_next" href="{{ route('btnDatePush', [$actualSessionsDays[$next_element], $next_element]) }}"></a>
+            @endif
         @endif
-    </nav>            
+    </nav>   
     
     @php
-        use App\Models\FilmTickets;
-
         foreach($sessionsDayPlanTables as $el) {
             if(str_contains($el, $currentPlaneDate)) {
 
@@ -217,8 +152,8 @@
         }
         $actualFilms = array_unique($actualFilms);   // убираем повторяющиеся фильы
         $actualHalls = array_unique($actualHalls);   // убираем повторяющиеся залы               
-    @endphp    
-
+    @endphp
+   
     @if($hall_blocked)
         <h1 class="movie-seances__hall-title" style="font-weight: normal; color:brown; margin-left: 50px"><span style="font-weight: normal; color:brown">В Зале </span> {{ $hall }} ПРОДАЖА БИЛЕТОВ ПРИОСТАНОВЛЕНА!!!</h1>
     @endif

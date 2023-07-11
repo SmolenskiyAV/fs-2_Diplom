@@ -55,4 +55,16 @@ class RegisterController extends Controller
             'formError' => 'Произошла ошибка при изменении пароля!'
         ]);
     }
+
+    public function register_get() {
+        if(Auth::check()|| Auth::viaRemember()) {
+            return redirect(route('user.private'));
+        }
+        
+        return view('/auth/app_register');
+    }
+
+    public function admin_register() {  // РЕГИСТРАЦИЯ администратора
+        return view('/auth/app_register');
+    }
 }

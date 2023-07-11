@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateRequest;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,5 +24,30 @@ class LoginController extends Controller
         return redirect(route('user.login'))->withErrors([ // ..если попытка аутентификации провалилась - редирект и вывод сообщ. об ошибке
             'email' => 'Не удалось аутентифицироваться!'
         ]);
+    }
+
+    public function login_get() {
+        if(Auth::check()) {
+            return redirect(route('user.private'));
+        }
+        
+        return view('/auth/app_login');
+    }
+
+    public function logout(Request $request) {
+        if(Auth::check()|| Auth::viaRemember()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
+            return redirect(route('admin_login'));
+        }
+        return redirect(route('user.login'))->withErrors( // ..если попытка выхода провалилась - редирект и вывод сообщ. об ошибке
+            'LogoutError!!!');
+    }
+
+    public function admin_login(){   // ВХОДА НА СТРАНИЦУ АДМИНИСТРИРОВАНИЯ
+        
+        return view('/auth/app_login');
     }
 }

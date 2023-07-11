@@ -1,91 +1,61 @@
 <?php
 
 use App\Http\Controllers\RegisterController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TodoController;
 use App\Http\Controllers\ClientController;
-use App\Models\Film;
-use App\Models\Hall;
-
-Route::get('/', function () {
-    $hall_blocked = false;     // маркер
-    return view('/layouts/app_client', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate(), 'hall_blocked' => $hall_blocked]);
-})->name('home');
 
 
-Route::get('/admin', function () {
-    return view('/layouts/app_admin', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
-})->name('admin_main')->middleware('auth');
+// **************************** КЛИЕНТСКАЯ (пользовательская) ЧАСТЬ********************************************
 
-Route::get('/login', function () {
-    return view('/auth/app_login');
-})->name('admin_login');
+Route::post('/', [ClientController::class, 'home'])->name('home');  // МАРШРУТ ГЛАВНОЙ СТРАНИЦЫ БРОНИРОВАНИЯ
 
-Route::get('/register', function () {
-    return view('/auth/app_register');
-})->name('admin_register');
+Route::get('/client', [ClientController::class, 'client'])->name('client_main');  // МАРШРУТ ГЛАВНОЙ СТРАНИЦЫ БРОНИРОВАНИЯ (алтернативный)
 
+Route::get('/hall', [ClientController::class, 'halls'])->name('client_hall');   // МАРШРУТ ВЫБОРА СЕАНСА (конкретные дата, время и зал)
 
+Route::get('/payment', [ClientController::class, 'payment'])->name('client_payment');   // МАРШРУТ ОПЛАТЫ БИЛЕТОВ (БРОНИРОВАНИЕ)
 
-Route::get('/client', function () {
-    $hall_blocked = false;     // маркер
-    return view('/layouts/app_client', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate(), 'hall_blocked' => $hall_blocked]);
-})->name('client_main');
+Route::get('/ticket',  [ClientController::class, 'ticket'])->name('client_ticket');
 
-Route::get('/hall', function () {
-    return view('/inc/app_hall', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
-})->name('client_hall');
+Route::get('/btnDatePush/{sessions_date}/start_element/{start_element}', [ClientController::class, 'btnDatePush'])->name('btnDatePush');
 
-Route::get('/payment', function () {
-    return view('/inc/app_payment', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
-})->name('client_payment');
+Route::get('/btnTimePush/{film_start}/film/{film_name}/hall/{hall_name}/date/{film_date}/tickets/{tickets_table}', [ClientController::class, 'btnTimePush'])->name('btnTimePush');
 
-Route::get('/ticket', function () {
-    return view('/inc/app_ticket', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
-})->name('client_ticket');
+Route::get('/chooseTickets', [ClientController::class, 'chooseTickets'])->name('chooseTickets');  // МАРШРУТ ВЫБОРА МЕСТ В ЗАЛЕ
+
+Route::post('/getTicketCode', [ClientController::class, 'getTicketCode'])->name('getTicketCode');   // МАРШРУТ ПОЛУЧЕНИЯ QR-кода
 
 
+
+// ****************************** РЕГИСТРАЦИЯ АДМИНА *********************************************************
 
 route::name('user.')->group(function () {
    
     route::view('/layouts/app_admin', '/layouts/app_admin')->middleware('auth')->name('private');
 
-    Route::get('/auth/app_login', function () { 
-        if(Auth::check()) {
-            return redirect(route('user.private'));
-        }
-        
-        return view('/auth/app_login');
-    })->name('login');
+    Route::get('/auth/app_login', [\App\Http\Controllers\LoginController::class, 'login_get'])->name('login');
 
     route::post('/auth/app_login', [\App\Http\Controllers\LoginController::class, 'login']);  
 
     route::post('/auth/register/changePass/{email}', [RegisterController::class, 'updatePassword'])->name('updatePassword');
 
-    route::get('/auth/logout', function (Request $request){
-        if(Auth::check()|| Auth::viaRemember()) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            
-            return redirect(route('admin_login'));
-        }
-        return redirect(route('user.login'))->withErrors( // ..если попытка выхода провалилась - редирект и вывод сообщ. об ошибке
-            'LogoutError!!!');
-    })->name('logout');
+    route::get('/auth/logout', [\App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
 
-    Route::get('/auth/app_register', function () {  
-        if(Auth::check()|| Auth::viaRemember()) {
-            return redirect(route('user.private'));
-        }
-        
-        return view('/auth/app_register');
-    })->name('register');
+    Route::get('/auth/app_register', [RegisterController::class, 'register_get'])->name('register');
 
     Route::post('/auth/app_register', [RegisterController::class, 'register']); 
 });
+
+
+
+// ********************************** АДМИНИСТРИРОВАНИЕ ЗАЛОВ и СЕТКИ СЕАНСОВ ********************************
+
+Route::get('/admin', [TodoController::class, 'admin_main'])->name('admin_main')->middleware('auth'); // маршрут СТРАНИЦЫ АДМИНИСТРИРОВАНИЯ
+
+Route::get('/login', [\App\Http\Controllers\LoginController::class, 'admin_login'])->name('admin_login');    // МАРШРУТ ВХОДА НА СТРАНИЦУ АДМИНИСТРИРОВАНИЯ
+
+Route::get('/register', [RegisterController::class, 'admin_register'])->name('admin_register'); // МАРШРУТ РЕГИСТРАЦИИ администратора
 
 Route::post('/addHall', [TodoController::class, 'addHall'])->name('addHall');
 Route::get('/delHall', [TodoController::class, 'delHall'])->name('delHall');
@@ -107,19 +77,3 @@ Route::post('/changeFilmSession', [TodoController::class, 'changeFilmSession'])-
 
 Route::get('/changeSaleStatus', [TodoController::class, 'changeSaleStatus'])->name('changeSaleStatus');
 
-Route::get('/btnDatePush/{sessions_date}/start_element/{start_element}', [ClientController::class, 'btnDatePush'])->name('btnDatePush');
-Route::get('/btnTimePush/{film_start}/film/{film_name}/hall/{hall_name}/date/{film_date}/tickets/{tickets_table}', [ClientController::class, 'btnTimePush'])->name('btnTimePush');
-
-Route::get('/chooseTickets', function (Request $request) {
-
-    $film_name = $request->input('film_name');
-    $hall_name = $request->input('hall_name');
-    $film_date = $request->input('film_date');
-    $session_time = $request->input('session_time');
-    $total_cost = $request->input('total_cost');
-    $arr = json_decode($request->input('arr'));
-    
-    return view('/inc/app_payment', ['choose_array' => $arr, 'film_name' => $film_name, 'hall_name' => $hall_name, 'film_date' => $film_date, 'session_time' => $session_time, 'total_cost' => $total_cost]);
-})->name('chooseTickets');
-
-Route::post('/getTicketCode', [ClientController::class, 'getTicketCode'])->name('getTicketCode');

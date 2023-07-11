@@ -38,17 +38,10 @@
         $status_color = 'black';
         $posterBackground_path = '';
         $sale_status = false;
-        
-        function generateRandomString($length = 10) {
-            $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            $charactersLength = strlen($characters);
-            $randomString = '';
-            for ($i = 0; $i < $length; $i++) {
-                $randomString .= $characters[random_int(0, $charactersLength - 1)];
-            }
-            return $randomString;
-        }
+        if (empty($dataHalls)) $dataHalls = [];
+        if (empty($dataFilms)) $dataFilms = [];        
     @endphp    
+
     <section class="conf-step" id="Halls_Control">
         <header class="conf-step__header conf-step__header_opened">
             <h2 class="conf-step__title">Управление залами</h2>
@@ -347,26 +340,9 @@
 
             <p class="conf-step__paragraph2 conf-step__legend" style="margin-bottom: 2px;">Для добавления новых сеансов в суточный план кликните по названию зала (нужного плана).</p>
             <p class="conf-step__paragraph2 conf-step__legend">Для удаления сеанса фильма (внутри суточного плана) кликните по иконке сеанса.</p>
-            
-            @php
-                $allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");
-                $sessionsPlanTables = [];      // список всех таблиц планов сеансов в БД
-                $sessionsDayPlanTables = [];   // список всех таблиц сеансов в БД 
 
-                foreach($allTables as $el) {
-
-                    if (preg_match("/(_tickets)/", $el->name)){
-                        $sessionsDayPlanTables[] = $el->name;
-                        continue;
-                    }
-                    if (preg_match("/.+(\*).+/", $el->name)){
-                        $sessionsPlanTables[] = $el->name;
-                    }
-                }
-            @endphp
             
-            
-        <div class="conf-step__seances" id="Seances_Plans"> 
+            <div class="conf-step__seances" id="Seances_Plans"> 
                 @foreach($sessionsPlanTables as $el1)
                     @php
                         $temporal_array1 = explode("*" , $el1);
@@ -385,9 +361,9 @@
                             $sale_status = true;        // все продажи билетов открыты
                         } else {
                             $status_color = 'red';      // зал закрыт для продаж
-                            $status_text = 'Продажи закрыты!';                          
+                            $status_text = 'Продажи закрыты!';                         
                         }
-                        $randomID = generateRandomString();
+                        
                     @endphp
                     <div class="conf-step__seances-hall">
                         <div style="display: flex;">

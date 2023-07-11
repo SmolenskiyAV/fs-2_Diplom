@@ -21,10 +21,55 @@ use Illuminate\Support\Facades\Auth;
 
 class TodoController extends Controller
 {
-    public function index()
-    {
 
-    }    
+    public $randomID; // случайный маркер (нужен для удаления сеанса из сетки)
+    public $sessionsPlanTables = [];      // список всех таблиц планов сеансов в БД
+    public $sessionsDayPlanTables = [];   // список всех таблиц сеансов в БД 
+    public $allTables;
+
+    public function __construct(Request $request) {     // в конструкторе то, что отрабатывается при каждой загрузке app_admin-шаблона
+        
+        function generateRandomString($length = 10) {   // генератор случайных целых чисел
+            $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $charactersLength = strlen($characters);
+            $randomString = '';
+            for ($i = 0; $i < $length; $i++) {
+                $randomString .= $characters[random_int(0, $charactersLength - 1)];
+            }
+            return $randomString;
+        }
+    
+        $this->randomID = generateRandomString();
+
+        $this->allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");
+                
+
+        foreach($this->allTables as $el) {
+
+            if (preg_match("/(_tickets)/", $el->name)){
+                $this->sessionsDayPlanTables[] = $el->name;
+                continue;
+            }
+            if (preg_match("/.+(\*).+/", $el->name)){
+                $this->sessionsPlanTables[] = $el->name;
+            }
+        }
+    }
+    
+
+
+
+    public function admin_main(){   // СТРАНИЦА АДМИНИСТРИРОВАНИЯ
+
+        return view('/layouts/app_admin', [
+            'dataHalls' => Hall::paginate(), 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ]);
+    }     
 
     public function addHall(CreateHallRequest $request) // ДОБАВИТЬ ЗАЛ
     {
@@ -60,7 +105,14 @@ class TodoController extends Controller
                   
         }    
 
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Новый зал успешно добавлен');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', 'Новый зал успешно добавлен');
     }
 
 
@@ -95,7 +147,14 @@ class TodoController extends Controller
 
         Hall::where('hall_name', $hall_name)->delete(); // удаление записи в таблице "Зал"
                                             
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Зал ' . $hall_name . ' успешно удалён');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', 'Зал ' . $hall_name . ' успешно удалён');
     }
 
 
@@ -109,7 +168,10 @@ class TodoController extends Controller
         $email = Auth::user()->email; // получаем адрес текущего авторизованного админа
 
         if (($chair_standart_default === 0) || ($rows > 40) || ($seats_per_row > 50)) {
-            return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]) ->with('baddata', 'Новый размер зала ' . $hall_name . ' не может быть определён! Неверные параметры.');
+            return redirect()->route('admin_main', [
+                'dataHalls' => Hall::paginate(), 
+                'dataFilms' => Film::paginate()
+            ]) ->with('baddata', 'Новый размер зала ' . $hall_name . ' не может быть определён! Неверные параметры.');
         }
 
         DB::table('halls')->where('hall_name', $hall_name)->update([
@@ -137,7 +199,15 @@ class TodoController extends Controller
             }                  
         }        
 
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'radioBtnPushed' => $hall_name, 'dataFilms' => Film::paginate()]) ->with('success', 'Размер зала ' . $hall_name . ' успешно изменён');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'radioBtnPushed' => $hall_name, 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ]) ->with('success', 'Размер зала ' . $hall_name . ' успешно изменён');
     }
 
 
@@ -183,7 +253,15 @@ class TodoController extends Controller
             'locked_seats' =>$locked_seats
         ]);              
                                                       
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'radioBtnPushed' => $hall_name, 'dataFilms' => Film::paginate()])->with('success', 'Схема зала ' . $hall_name . ' успешно изменена');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'radioBtnPushed' => $hall_name, 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', 'Схема зала ' . $hall_name . ' успешно изменена');
     }
 
 
@@ -199,12 +277,29 @@ class TodoController extends Controller
             'usual_cost' =>$usual_cost
         ]);              
                                                       
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'radioBtnPushed' => $hall_name, 'dataFilms' => Film::paginate()])->with('success', 'Цены на места в зале ' . $hall_name . ' успешно изменены');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'radioBtnPushed' => $hall_name, 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', 'Цены на места в зале ' . $hall_name . ' успешно изменены');
     }
 
     public function btnPush($pushedBtn, $section)   // НАВИГАЦИЯ ПО РАДИО-КНОПКАМ
     {   // параметр $section определяет, куда будет перемещён скролл страницы после нажатия одной из радиокнопок
-        return view('/layouts/app_admin', ['dataHalls' => Hall::paginate(), 'radioBtnPushed' => $pushedBtn, 'section' => $section, 'dataFilms' => Film::paginate()]);
+        return view('/layouts/app_admin', [
+            'dataHalls' => Hall::paginate(), 
+            'radioBtnPushed' => $pushedBtn, 
+            'section' => $section, 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ]);
     }
 
     public function addFilm(CreateFilmRequest $request) // ДОБАВИТЬ ФИЛЬМ
@@ -237,7 +332,14 @@ class TodoController extends Controller
         $film->save();                          // создание записи в таблице "фильм"
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"        
            
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Новый фильм успешно добавлен');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', 'Новый фильм успешно добавлен');
     }
 
 
@@ -247,9 +349,10 @@ class TodoController extends Controller
         $film_name = $request->input('film_name');
                
         $poster_path = public_path() . DB::table('films')->where('film_name', $film_name)->value('poster_path');
+        
         unlink($poster_path);
-
         //Storage::disk('local')->delete($poster_path);                  // удаление постера, относящегося к данному фильму (не работает,сцуко..) :/
+
         Film::where('film_name', $film_name)->delete();                // удаление записи в таблице "Фильм"
         
         $allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");    // список всех таблиц БД
@@ -276,7 +379,14 @@ class TodoController extends Controller
         
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"    
                                             
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Фильм "' . $film_name . '" и его сеансы успешно удалены');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', 'Фильм "' . $film_name . '" и его сеансы успешно удалены');
     }
 
 
@@ -290,7 +400,14 @@ class TodoController extends Controller
 
         if (Schema::hasTable($hall_name . '*' . $sessions_date)) {
 
-            return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]) ->with('baddata', 'План сеансов зала ' . $hall_name . ' на ' . $sessions_date . ' уже существует!');
+            return redirect()->route('admin_main', [
+                'dataHalls' => Hall::paginate(), 
+                'dataFilms' => Film::paginate(),
+                'randomID' => $this->randomID,
+                'sessionsPlanTables' => $this->sessionsPlanTables,
+                'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+                'allTables' => $this->allTables
+            ]) ->with('baddata', 'План сеансов зала ' . $hall_name . ' на ' . $sessions_date . ' уже существует!');
 
         } else {
 
@@ -300,7 +417,14 @@ class TodoController extends Controller
             DB::table('halls')->where('hall_name', $hall_name)->increment('session_planes', 1);    // увеличиваем количество действующих планов сеансов для данного зала на 1 
         }
         
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Новый план сеансов зала' . '"'. $hall_name .'"' . ' на ' . $sessions_date . ' успешно добавлен');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', 'Новый план сеансов зала' . '"'. $hall_name .'"' . ' на ' . $sessions_date . ' успешно добавлен');
     }
 
 
@@ -324,7 +448,14 @@ class TodoController extends Controller
 
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"
 
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'План сеансов зала '. '"'. $hall_name .'"' . ' на ' . $sessions_date .' успешно удалён из сетки сеансов');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', 'План сеансов зала '. '"'. $hall_name .'"' . ' на ' . $sessions_date .' успешно удалён из сетки сеансов');
     }  
 
 
@@ -419,7 +550,14 @@ class TodoController extends Controller
 
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"
 
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', 'Изменения в сетку сеансов успешно добавлены');
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', 'Изменения в сетку сеансов успешно добавлены');
     }
 
 
@@ -449,6 +587,13 @@ class TodoController extends Controller
 
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"
         
-        return redirect()->route('admin_main', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()])->with('success', $status_msge);
+        return redirect()->route('admin_main', [
+            'dataHalls' => Hall::paginate(), 
+            'dataFilms' => Film::paginate(),
+            'randomID' => $this->randomID,
+            'sessionsPlanTables' => $this->sessionsPlanTables,
+            'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
+            'allTables' => $this->allTables
+        ])->with('success', $status_msge);
     }    
 }
