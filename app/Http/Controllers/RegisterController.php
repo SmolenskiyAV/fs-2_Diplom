@@ -56,15 +56,15 @@ class RegisterController extends Controller
         ]);
     }
 
-    public function register_get() {
+    public function registerGet() {
         if(Auth::check()|| Auth::viaRemember()) {
             return redirect(route('user.private'));
         }
         
-        return view('/auth/app_register');
+        return view('auth.app_register');
     }
 
-    public function admin_register() {  // РЕГИСТРАЦИЯ администратора
-        return view('/auth/app_register');
+    public function adminRegister() {  // РЕГИСТРАЦИЯ администратора
+        return view('auth.app_register');
     }
 }

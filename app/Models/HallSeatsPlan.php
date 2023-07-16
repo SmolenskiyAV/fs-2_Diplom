@@ -5,14 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class HallSeatsPlan extends Model   // МОДЕЛЬ таблицы "Схема зала" (план мест. для каждого зала отдельная таблица)
+/**
+ * МОДЕЛЬ таблицы "Схема зала" (план мест. для каждого зала отдельная таблица)
+ */
+class HallSeatsPlan extends Model
 {
     use HasFactory;
 
     private string $name;
     public $timestamps = false;
+    protected $table = '';
+    static $tableId = null;
+	protected $fillable = ['row', 'number', 'type'];
 
-			
+	/**
+	 * Функция для создания новой таблицы "Схема зала" в БД (осздаётся не через миграции, а в зависимости от действий администратора)
+	 *
+	 * @param mixed $hall_name
+	 * 
+	 */
 	public static function relation($hall_name)
 	{
 		$name = $hall_name . '_plane';
@@ -23,11 +34,10 @@ class HallSeatsPlan extends Model   // МОДЕЛЬ таблицы "Схема �
         
 	}
 
-    // *** метод переприсваивания protected $table ***
-    protected $table = '';
-
-    static $tableId = null;
-
+    /**
+     * Метод переприсваивания protected $table (нужен для привязки модели к динамически создаваемой таблице)
+     *
+     */
     public function getTable()
     {
         return $this->table . static::$tableId;
@@ -41,9 +51,6 @@ class HallSeatsPlan extends Model   // МОДЕЛЬ таблицы "Схема �
 
         static::$tableId = $tableId;
     }
-    // ***********************************************
-
-    protected $fillable = ['row', 'number', 'type'];
 
     public function hall()  
     {

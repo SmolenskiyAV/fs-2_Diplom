@@ -5,7 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Film extends Model    // МОДЕЛЬ таблицы "Фильмы"
+/**
+ * МОДЕЛЬ таблицы "Фильмы"
+ */
+class Film extends Model
 {
     use HasFactory;
 

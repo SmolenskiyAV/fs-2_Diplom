@@ -10,16 +10,12 @@
     @vite(['resources/css/admin/styles.scss'])
 </head>
 
-@php    
-    $email = Auth::user()->email; // получаем адрес текущего авторизованного админа    
-@endphp
-
 <body>
 <header class="page-header">
     <h1 class="page-header__title">Идём<span>в</span>кино</h1>
     <span class="page-header__subtitle">Администраторррская</span>
-    <h3 style="margin-top: 20px;  margin-bottom: 10px;" class="conf-step__title">админ<span>:</span>{{$email}}</h3>
-    <a style="text-decoration: none;" href="{{route('user.logout')}}"><h2 class="conf-step__title" style="color:blue;">выйти</h2></a>
+    <h3 style="margin-top: 20px;  margin-bottom: 10px;" class="conf-step__title">админ<span>:</span>{{ Auth::user()->email }}</h3>
+    <a style="text-decoration: none;" href="{{ route('user.logout') }}"><h2 class="conf-step__title" style="color:blue;">выйти</h2></a>
 </header>
 
 <main class="conf-steps">
@@ -27,8 +23,15 @@
         $hall_name_cfg ='';
         $hall_rows_cfg = 0;
         $hall_seats_per_row_cfg =0;
-        if (empty($radioBtnPushed)) $radioBtnPushed = '';
-        if (empty($section)) $section = 0;
+
+        if (empty($radioBtnPushed)) {
+            $radioBtnPushed = '';
+        }
+
+        if (empty($section)) {
+            $section = 0;
+        }
+
         $film_name_cfg ='';
         $film_duration = 0;
         $poster_path = '';
@@ -38,8 +41,14 @@
         $status_color = 'black';
         $posterBackground_path = '';
         $sale_status = false;
-        if (empty($dataHalls)) $dataHalls = [];
-        if (empty($dataFilms)) $dataFilms = [];        
+        
+        if (empty($dataHalls)) {
+            $dataHalls = [];
+        }
+
+        if (empty($dataFilms)) {
+            $dataFilms = [];        
+        }
     @endphp    
 
     <section class="conf-step" id="Halls_Control">
@@ -68,12 +77,12 @@
                     <div class="popup__header">
                         <h2 class="popup__title">
                             Добавление зала
-                            <a class="popup__dismiss" href="#"><img src={{asset('storage/images/admin/close.png')}} alt="Закрыть"></a>
+                            <a class="popup__dismiss" href="#"><img src={{ asset('storage/images/admin/close.png') }} alt="Закрыть"></a>
                         </h2>                        
                     </div>
                     <p class="conf-step__paragraph2 conf-step__legend" style="margin-left: 15px; margin-top: 7px">Для имени зала используй только латинские буквы, цифры, точку или тире!.</p>
                     <div class="popup__wrapper">
-                        <form action="{{route('addHall')}}" method="post" accept-charset="utf-8">
+                        <form action="{{ route('addHall') }}" method="post" accept-charset="utf-8">
                             @csrf
                             <label class="conf-step__label conf-step__label-fullsize" for="hall_name">
                                 Название зала
@@ -95,7 +104,7 @@
                     <div class="popup__header">
                         <h2 class="popup__title">
                             Удаление зала
-                            <a class="popup__dismiss" href="#"><img src={{asset('storage/images/admin/close.png')}} alt="Закрыть"></a>
+                            <a class="popup__dismiss" href="#"><img src={{ asset('storage/images/admin/close.png') }} alt="Закрыть"></a>
                         </h2>
 
                     </div>
@@ -137,7 +146,7 @@
                 @if ($radioBtnPushed === '')
                     @foreach($dataHalls as $el)
                         @if ($loop->first)
-                            <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>
+                            <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{ $el->hall_name }}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{ $el->hall_name }}</span></a></li>
                             @php
                                 $hall_name_cfg = $el->hall_name;
                                 $hall_rows_cfg = $el->rows;
@@ -145,7 +154,7 @@
                             @endphp
                             @continue
                         @endif
-                        <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>        
+                        <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{ $el->hall_name }}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{ $el->hall_name }}</span></a></li>        
                     @endforeach
                 @else                    
                     @foreach($dataHalls as $el)
@@ -159,7 +168,7 @@
                                     });
                                 </script>
                             @endif
-                            <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>
+                            <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{ $el->hall_name }}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{ $el->hall_name }}</span></a></li>
                             @php
                                 $hall_name_cfg = $radioBtnPushed;
                                 $hall_rows_cfg = $el->rows;
@@ -167,13 +176,13 @@
                             @endphp
                             @continue
                         @endif
-                        <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{$el->hall_name}}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>        
+                        <li><a href="{{ route('btnPush', [$el->hall_name, 2]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cfg" value="{{ $el->hall_name }}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{ $el->hall_name }}</span></a></li>        
                     @endforeach
                 @endif
             </ul>
             <p class="conf-step__paragraph">Укажите количество рядов (не более 40) и максимальное количество кресел в ряду (не более 50):</p>
             
-            <form id="SetHallSize" action="{{route('sizeHall')}}" method="post" accept-charset="utf-8">
+            <form id="SetHallSize" action="{{ route('sizeHall') }}" method="post" accept-charset="utf-8">
                 @csrf
                 <div class="conf-step__legend">
                     <label class="conf-step__label">Рядов, шт<input type="text" name="rows" class="conf-step__input" placeholder="10" value="{{ $hall_rows_cfg }}" required></label>
@@ -224,10 +233,10 @@
                 </div>
             
                 <fieldset class="conf-step__buttons text-center">                    
-                    <form id="SetHallPlane" action="{{route('planeHall')}}" method="post" accept-charset="utf-8">
+                    <form id="SetHallPlane" action="{{ route('planeHall') }}" method="post" accept-charset="utf-8">
                         @csrf
                         <button class="conf-step__button conf-step__button-regular" style="margin-right: 15px">Отмена</button>
-                        <input type="hidden" name="hall_cfg_name" value="{{$hall_name_cfg}}">
+                        <input type="hidden" name="hall_cfg_name" value="{{ $hall_name_cfg }}">
                         <input type="hidden" name="hall_plane" value="">
                         <input type="submit" value="Сохранить" class="conf-step__button conf-step__button-accent">
                     </form>
@@ -253,10 +262,10 @@
                 @if ($radioBtnPushed === '')
                     @foreach($dataHalls as $el)
                         @if ($loop->first)
-                            <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>
+                            <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{ $el->hall_name }}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{ $el->hall_name }}</span></a></li>
                             @continue
                         @endif
-                        <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>        
+                        <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{ $el->hall_name }}</span></a></li>        
                     @endforeach
                 @else                    
                     @foreach($dataHalls as $el)
@@ -270,10 +279,10 @@
                                     });
                                 </script>
                             @endif
-                            <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>
+                            <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{ $el->hall_name }}" style='pointer-events: none;' checked><span class="conf-step__selector" style='pointer-events: none;'>{{ $el->hall_name }}</span></a></li>
                             @continue
                         @endif
-                        <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{$el->hall_name}}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{$el->hall_name}}</span></a></li>        
+                        <li><a href="{{ route('btnPush', [$el->hall_name, 3]) }}" style="text-decoration: none; color: black"><input type="radio" class="conf-step__radio" name="chairs-hall-cost" value="{{ $el->hall_name }}" style='pointer-events: none;'><span class="conf-step__selector" style='pointer-events: none;'>{{ $el->hall_name }}</span></a></li>        
                     @endforeach
                 @endif
             </ul>
@@ -325,7 +334,7 @@
             <div class="conf-step__movies">
                 @foreach($dataFilms as $el)               
                     <div class="conf-step__movie">
-                        <img class="conf-step__movie-poster" alt="poster" data-name="{{ $el->film_name }}" src={{asset("$el->poster_path")}}>
+                        <img class="conf-step__movie-poster" alt="poster" data-name="{{ $el->film_name }}" src={{ asset("$el->poster_path") }}>
                         <h3 class="conf-step__movie-title">{{ $el->film_name }}</h3>
                         <p class="conf-step__movie-duration" data-name="{{ $el->film_name }}">{{ $el->film_duration }} минут</p>                        
                     </div>                
@@ -429,7 +438,7 @@
             </div>     
                       
 
-            <form action="{{route('changeFilmSession')}}" method="post" enctype="multipart/form-data" accept-charset="utf-8" name="operate_all_plans" class="conf-step__buttons text-center" style="display: none">
+            <form action="{{ route('changeFilmSession') }}" method="post" enctype="multipart/form-data" accept-charset="utf-8" name="operate_all_plans" class="conf-step__buttons text-center" style="display: none">
                 @csrf
                 <button class="conf-step__button conf-step__button-regular">Отмена</button>
                 <input type="hidden" name="sessionsarray" value="">
@@ -444,12 +453,12 @@
                     <div class="popup__header">
                         <h2 class="popup__title">
                             Добавление фильма
-                            <a class="popup__dismiss" href="#"><img src={{asset('storage/images/admin/close.png')}} alt="Закрыть"></a>
+                            <a class="popup__dismiss" href="#"><img src={{ asset('storage/images/admin/close.png') }} alt="Закрыть"></a>
                         </h2>
 
                     </div>
                     <div class="popup__wrapper">
-                        <form action="{{route('addFilm')}}" method="post" enctype="multipart/form-data" accept-charset="utf-8">
+                        <form action="{{ route('addFilm') }}" method="post" enctype="multipart/form-data" accept-charset="utf-8">
                             @csrf
                             <label class="conf-step__label conf-step__label-fullsize" for="film_name">
                                 Название фильма
@@ -487,7 +496,7 @@
                     <div class="popup__header">
                         <h2 class="popup__title">
                             Удаление фильма
-                            <a class="popup__dismiss" href="#"><img src={{asset('storage/images/admin/close.png')}} alt="Закрыть"></a>
+                            <a class="popup__dismiss" href="#"><img src={{ asset('storage/images/admin/close.png') }} alt="Закрыть"></a>
                         </h2>
 
                     </div>
@@ -513,12 +522,12 @@
                     <div class="popup__header">
                         <h2 class="popup__title">
                             Добавление плана в сетку сеансов
-                            <a class="popup__dismiss" href="#"><img src={{asset('storage/images/admin/close.png')}} alt="Закрыть"></a>
+                            <a class="popup__dismiss" href="#"><img src={{ asset('storage/images/admin/close.png') }} alt="Закрыть"></a>
                         </h2>
 
                     </div>
                     <div class="popup__wrapper">
-                        <form action="{{route('addSessionsPlan')}}" method="post" enctype="multipart/form-data" accept-charset="utf-8">
+                        <form action="{{ route('addSessionsPlan') }}" method="post" enctype="multipart/form-data" accept-charset="utf-8">
                             @csrf
                             <label class="conf-step__label conf-step__label-fullsize" for="hall_name">
                                 Название зала                                
@@ -549,7 +558,7 @@
                     <div class="popup__header">
                         <h2 class="popup__title">
                             Удаление плана сеансов
-                            <a class="popup__dismiss" href="#"><img src={{asset('storage/images/admin/close.png')}} alt="Закрыть"></a>
+                            <a class="popup__dismiss" href="#"><img src={{ asset('storage/images/admin/close.png') }} alt="Закрыть"></a>
                         </h2>
 
                     </div>
@@ -577,7 +586,7 @@
                     <div class="popup__header">
                         <h2 class="popup__title">
                             Добавление сеанса фильма в суточный план
-                            <a class="popup__dismiss" href="#"><img src={{asset('storage/images/admin/close.png')}} alt="Закрыть"></a>
+                            <a class="popup__dismiss" href="#"><img src={{ asset('storage/images/admin/close.png') }} alt="Закрыть"></a>
                         </h2>
 
                     </div>
@@ -633,7 +642,7 @@
                     <div class="popup__header">
                         <h2 class="popup__title">
                             Удаление сеанса из суточного плана
-                            <a class="popup__dismiss" href="#"><img src={{asset('storage/images/admin/close.png')}} alt="Закрыть"></a>
+                            <a class="popup__dismiss" href="#"><img src={{ asset('storage/images/admin/close.png') }} alt="Закрыть"></a>
                         </h2>
 
                     </div>

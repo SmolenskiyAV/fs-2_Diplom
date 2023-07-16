@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class HallSessionsPlaneCreate // класс создания/удаления таблицы "План сеансов в зале на конкретный день"
-{
-    	
+/**
+ * Класс создания/удаления таблицы "План сеансов в зале на конкретный день"
+ */
+class HallSessionsPlaneCreate
+{    	
     public function up(string $name): void
     {
         

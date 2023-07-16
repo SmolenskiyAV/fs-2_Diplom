@@ -5,7 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class HallSeatsPlaneCreate // класс создания/удаления таблицы "План мест в зале"
+/**
+ * Класс создания/удаления таблицы "План мест в зале"
+ */
+class HallSeatsPlaneCreate
 {
     	
     public function up(string $name): void
@@ -19,7 +22,7 @@ class HallSeatsPlaneCreate // класс создания/удаления та�
             
             $table->integer('row') ->nullable(false);              // ряд в зале, к которому принадлежит место
             $table->integer('number') ->nullable(false);           // номер места в ряду
-            $table->integer('type') ->default(0);             // тип места: 0-заблокировано; 1-обычное; 2-VIP            
+            $table->integer('type') ->default(0);                  // тип места: 0-заблокировано; 1-обычное; 2-VIP            
         });
     }
 

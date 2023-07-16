@@ -17,32 +17,49 @@ use App\Models\HallSessionsPlaneCreate;
 use App\Models\FilmTicketsCreate;
 use App\Models\FilmTickets;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 
 class TodoController extends Controller
 {
+    /**
+     * случайный маркер (нужен для удаления сеанса из сетки)
+     *
+     * @var string
+     */
+    public string $randomID;
 
-    public $randomID; // случайный маркер (нужен для удаления сеанса из сетки)
-    public $sessionsPlanTables = [];      // список всех таблиц планов сеансов в БД
-    public $sessionsDayPlanTables = [];   // список всех таблиц сеансов в БД 
-    public $allTables;
+    /**
+     * список всех таблиц планов сеансов в БД
+     *
+     * @var array
+     */
+    public array $sessionsPlanTables = [];
 
-    public function __construct(Request $request) {     // в конструкторе то, что отрабатывается при каждой загрузке app_admin-шаблона
-        
-        function generateRandomString($length = 10) {   // генератор случайных целых чисел
-            $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            $charactersLength = strlen($characters);
-            $randomString = '';
-            for ($i = 0; $i < $length; $i++) {
-                $randomString .= $characters[random_int(0, $charactersLength - 1)];
-            }
-            return $randomString;
-        }
-    
-        $this->randomID = generateRandomString();
+    /**
+     * список всех таблиц сеансов в БД
+     *
+     * @var array
+     */
+    public array $sessionsDayPlanTables = [];
 
-        $this->allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");
-                
+    /**
+     * Массив имён всех таблиц, созданных в текущей БД
+     *
+     * @var array
+     */
+    public array $allTables;
+
+    /**
+     * В конструкторе то, что отрабатывается при каждой загрузке app_admin-шаблона
+     *
+     * 
+     */
+    public function __construct()
+    {          
+        $this->randomID = Str::random(10);
+
+        $this->allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");                
 
         foreach($this->allTables as $el) {
 
@@ -55,13 +72,13 @@ class TodoController extends Controller
             }
         }
     }
-    
 
-
-
-    public function admin_main(){   // СТРАНИЦА АДМИНИСТРИРОВАНИЯ
-
-        return view('/layouts/app_admin', [
+    /**
+     * СТРАНИЦА АДМИНИСТРИРОВАНИЯ
+     */
+    public function showAdminMain()
+    {
+        return view('layouts.app_admin', [
             'dataHalls' => Hall::paginate(), 
             'dataFilms' => Film::paginate(),
             'randomID' => $this->randomID,
@@ -71,14 +88,17 @@ class TodoController extends Controller
         ]);
     }     
 
-    public function addHall(CreateHallRequest $request) // ДОБАВИТЬ ЗАЛ
+    /**
+     * ДОБАВИТЬ ЗАЛ
+     *
+     * @param CreateHallRequest $request
+     */
+    public function addHall(CreateHallRequest $request)
     {
-        $email = Auth::user()->email; // получаем адрес текущего авторизованного админа
-
         $hall_name = $request->input('hall_name');
         $hall = new Hall();
         $hall->hall_name = $hall_name;
-        $hall->admin_updater = $email;
+        $hall->admin_updater = Auth::user()->email; // получаем адрес текущего авторизованного админа
         
         $hall->save();                          // создание записи в таблице "зал"
 
@@ -101,8 +121,7 @@ class TodoController extends Controller
             $plane->type = 1;
 
             $hall->hallSeatsPlan()->save($plane);      // создание дефолтной записи в зависимой таблице "План мест в зале"
-            }
-                  
+            }                  
         }    
 
         return redirect()->route('admin_main', [
@@ -115,9 +134,12 @@ class TodoController extends Controller
         ])->with('success', 'Новый зал успешно добавлен');
     }
 
-
-
-    public function delHall(Request $request)   //  УДАЛИТЬ ЗАЛ
+    /**
+     * УДАЛИТЬ ЗАЛ]
+     *
+     * @param Request $request
+     */
+    public function delHall(Request $request)
     {
         $hall_name = $request->input('hall_name');
                 
@@ -157,15 +179,17 @@ class TodoController extends Controller
         ])->with('success', 'Зал ' . $hall_name . ' успешно удалён');
     }
 
-
-
-    public function sizeHall(Request $request)   //  ЗАДАТЬ РАЗМЕР ЗАЛА
+    /**
+     * ЗАДАТЬ РАЗМЕР ЗАЛА
+     *
+     * @param Request $request
+     */
+    public function sizeHall(Request $request)
     {
         $hall_name = $request->input('hall_cfg_size');
         $rows = $request->input('rows');
         $seats_per_row = $request->input('seats_per_row');
-        $chair_standart_default = $rows * $seats_per_row;
-        $email = Auth::user()->email; // получаем адрес текущего авторизованного админа
+        $chair_standart_default = $rows * $seats_per_row;        
 
         if (($chair_standart_default === 0) || ($rows > 40) || ($seats_per_row > 50)) {
             return redirect()->route('admin_main', [
@@ -180,7 +204,7 @@ class TodoController extends Controller
             'vip_seats' =>0,
             'usual_seats' =>$chair_standart_default,
             'locked_seats' =>0,
-            'admin_updater' => $email
+            'admin_updater' => Auth::user()->email // получаем адрес текущего авторизованного админа
         ]);  
         
         $hall = Hall::where('hall_name', $hall_name)->first();
@@ -210,16 +234,18 @@ class TodoController extends Controller
         ]) ->with('success', 'Размер зала ' . $hall_name . ' успешно изменён');
     }
 
-
-
-    public function planeHall(Request $request)   //  ЗАДАТЬ ПЛАНИРОВКУ ЗАЛА
+    /**
+     * ЗАДАТЬ ПЛАНИРОВКУ ЗАЛА
+     *
+     * @param Request $request
+     */
+    public function planeHall(Request $request)
     {                        
         $hall_name = $request->input('hall_cfg_name');
         $hall_plane = json_decode(($request->input('hall_plane')), true);   // преобразование полученных json-данных в массив
 
         $hall = Hall::where('hall_name', $hall_name)->first();
         DB::table($hall_name . '_plane')->truncate();             // очистка таблицы "План мест в зале" перед новым заполнением
-
       
         $rows = 1;
         $seats_per_row =1;
@@ -227,23 +253,23 @@ class TodoController extends Controller
         $usual_seats = 0;
         $locked_seats = 0;
                        
-        for ($i = 0, $size = count($hall_plane); $i < $size; ++$i) {
+        foreach ($hall_plane as $i) {
 
             $plane = HallSeatsPlan::relation($hall_name);
-            $plane->row = $hall_plane[$i][0];
-            $plane->number = $hall_plane[$i][1];
-            $plane->type = $hall_plane[$i][2];
+            $plane->row = $i[0];
+            $plane->number = $i[1];
+            $plane->type = $i[2];
 
             $hall->hallSeatsPlan()->save($plane);      // создание записи в зависимой таблице "План мест в зале"
 
-            $rowVar = $hall_plane[$i][0];
+            $rowVar = $i[0];
             if($rowVar > $rows)  $rows = $rows +1;   // количество рядов в зале (для новой планировки)  
-            if ($hall_plane[$i][2] == 0) $locked_seats++;   // количество заблокированных мест в зале (для новой планировки)
-            if ($hall_plane[$i][2] == 1) $usual_seats++;    // количество стандартных мест в зале (для новой планировки)   
-            if ($hall_plane[$i][2] == 2) $vip_seats++;      // количество vip-мест в зале (для новой планировки)
+            if ($i[2] == 0) $locked_seats++;   // количество заблокированных мест в зале (для новой планировки)
+            if ($i[2] == 1) $usual_seats++;    // количество стандартных мест в зале (для новой планировки)   
+            if ($i[2] == 2) $vip_seats++;      // количество vip-мест в зале (для новой планировки)
         }
         
-        $seats_per_row = $size / $rows;     // количество мест в ряду (для новой планировки)
+        $seats_per_row = count($hall_plane) / $rows;     // количество мест в ряду (для новой планировки)
 
         DB::table('halls')->where('hall_name', $hall_name)->update([
             'seats_per_row' => $seats_per_row, 
@@ -264,9 +290,12 @@ class TodoController extends Controller
         ])->with('success', 'Схема зала ' . $hall_name . ' успешно изменена');
     }
 
-
-
-    public function billingHall(Request $request)   //  УСТАНОВИТЬ ЦЕНЫ ДЛЯ ТИПОВ КРЕСЕЛ
+    /**
+     * УСТАНОВИТЬ ЦЕНЫ ДЛЯ ТИПОВ КРЕСЕЛ
+     *
+     * @param Request $request
+     */
+    public function billingHall(Request $request)
     {
         $hall_name = $request->input('hall_cfg_cost');
         $vip_cost = $request->input('hall_vip_cost');
@@ -288,12 +317,18 @@ class TodoController extends Controller
         ])->with('success', 'Цены на места в зале ' . $hall_name . ' успешно изменены');
     }
 
-    public function btnPush($pushedBtn, $section)   // НАВИГАЦИЯ ПО РАДИО-КНОПКАМ
-    {   // параметр $section определяет, куда будет перемещён скролл страницы после нажатия одной из радиокнопок
-        return view('/layouts/app_admin', [
+    /**
+     * НАВИГАЦИЯ ПО РАДИО-КНОПКАМ
+     *
+     * @param mixed $pushedBtn
+     * @param mixed $section
+     */
+    public function btnPush($pushedBtn, $section)
+    {   
+        return view('layouts.app_admin', [
             'dataHalls' => Hall::paginate(), 
             'radioBtnPushed' => $pushedBtn, 
-            'section' => $section, 
+            'section' => $section,          // параметр $section определяет, куда будет перемещён скролл страницы после нажатия одной из радиокнопок
             'dataFilms' => Film::paginate(),
             'randomID' => $this->randomID,
             'sessionsPlanTables' => $this->sessionsPlanTables,
@@ -302,15 +337,19 @@ class TodoController extends Controller
         ]);
     }
 
-    public function addFilm(CreateFilmRequest $request) // ДОБАВИТЬ ФИЛЬМ
+    /**
+     * ДОБАВИТЬ ФИЛЬМ
+     *
+     * @param CreateFilmRequest $request
+     */
+    public function addFilm(CreateFilmRequest $request)
     {        
         $film_name = $request->input('film_name');
         $duration = $request->input('film_duration');        
         $extension = $request->poster->extension(); // получить расширение файла
         $film_country = $request->input('film_country');
         $film_description = $request->input('film_description');
-        $email = Auth::user()->email; // получаем адрес текущего авторизованного админа
-        
+                
         $poster_name = $film_name . '_poster';
         $poster_name = preg_replace('/[[:punct:]]|[\s\s+]/', '_', $poster_name);  //заменяем пробелы и спецсимволы из имени постера на "_";
         if($request->isMethod('post')) {
@@ -327,7 +366,7 @@ class TodoController extends Controller
         $film->poster_path = '/storage/images/films/' . "$poster_name.$extension";
         $film->description = $film_description;
         $film->country_source = $film_country;
-        $film->admin_updater = $email;
+        $film->admin_updater = Auth::user()->email; // получаем адрес текущего авторизованного админа
         
         $film->save();                          // создание записи в таблице "фильм"
         session()->flash('film_msg', true);     // маркер, определяющий, где на странице будут отображаться сессионные сообщения. Если 'true' - то в секции "Сетка сеансов"        
@@ -342,15 +381,18 @@ class TodoController extends Controller
         ])->with('success', 'Новый фильм успешно добавлен');
     }
 
-
-
-    public function delFilm(Request $request)   //  УДАЛИТЬ ФИЛЬМ
+    /**
+     * УДАЛИТЬ ФИЛЬМ
+     *
+     * @param Request $request
+     */
+    public function delFilm(Request $request)
     {
         $film_name = $request->input('film_name');
                
         $poster_path = public_path() . DB::table('films')->where('film_name', $film_name)->value('poster_path');
         
-        unlink($poster_path);
+        unlink($poster_path);                                            // удаление постера, относящегося к данному фильму (альтернативный вариант)
         //Storage::disk('local')->delete($poster_path);                  // удаление постера, относящегося к данному фильму (не работает,сцуко..) :/
 
         Film::where('film_name', $film_name)->delete();                // удаление записи в таблице "Фильм"
@@ -389,9 +431,12 @@ class TodoController extends Controller
         ])->with('success', 'Фильм "' . $film_name . '" и его сеансы успешно удалены');
     }
 
-
-
-    public function addSessionsPlan(Request $request) // ДОБАВИТЬ ПЛАН СЕАНСОВ НА КОНКРЕТНЫЙ ДЕНЬ
+    /**
+     * ДОБАВИТЬ ПЛАН СЕАНСОВ НА КОНКРЕТНЫЙ ДЕНЬ
+     *
+     * @param Request $request
+     */
+    public function addSessionsPlan(Request $request)
     {
         $hall_name = $request->input('hall_name');
         $sessions_date = $request->input('sessions_date');
@@ -427,9 +472,12 @@ class TodoController extends Controller
         ])->with('success', 'Новый план сеансов зала' . '"'. $hall_name .'"' . ' на ' . $sessions_date . ' успешно добавлен');
     }
 
-
-
-    public function delSessionsPlan(Request $request) // УДАЛИТЬ ПЛАН СЕАНСОВ НА КОНКРЕТНЫЙ ДЕНЬ
+    /**
+     * УДАЛИТЬ ПЛАН СЕАНСОВ НА КОНКРЕТНЫЙ ДЕНЬ
+     *
+     * @param Request $request
+     */
+    public function delSessionsPlan(Request $request)
     {
         $full_name = $request->input('fullPlanedName');
         $hall_name = $request->input('hallPlanedName');
@@ -456,16 +504,18 @@ class TodoController extends Controller
             'sessionsDayPlanTables' => $this->sessionsDayPlanTables,
             'allTables' => $this->allTables
         ])->with('success', 'План сеансов зала '. '"'. $hall_name .'"' . ' на ' . $sessions_date .' успешно удалён из сетки сеансов');
-    }  
+    }
 
-
-
-    public function infoFilmSession(Request $request) // ОТПРАВИТЬ ИНФОРМАЦИЮ О БИЛЕТАХ НА СЕАНС ФИЛЬМА
+    /**
+     * ОТПРАВИТЬ ИНФОРМАЦИЮ О БИЛЕТАХ НА СЕАНС ФИЛЬМА
+     *
+     * @param Request $request
+     */
+    public function infoFilmSession(Request $request)
     {   
         $session_name = json_encode([DB::table($request->input('table_tickets'))->get()]);
         
-        $tickets_obj = DB::table($request->input('table_tickets'))->get();
-        
+        $tickets_obj = DB::table($request->input('table_tickets'))->get();        
         $row = 1;
         $seats =1;
         $i = 0;
@@ -476,14 +526,17 @@ class TodoController extends Controller
             if($rowVar > $row)  $row = $row +1;   // количество рядов в зале  
             $i++;           
         }        
-        $seats = $i / $row;     // количество мест в ряду
-    
+        $seats = $i / $row;     // количество мест в ряду    
         
        return response([$row, $seats, $session_name], 200);
     }
 
-
-    public function changeFilmSession(Request $request) // ВНЕСТИ ИЗМЕНЕИЯ В СЕТКУ СЕАНСОВ
+    /**
+     * ВНЕСТИ ИЗМЕНЕИЯ В СЕТКУ СЕАНСОВ
+     *
+     * @param Request $request
+     */
+    public function changeFilmSession(Request $request)
     {       
         $request_array = json_decode(($request->input('sessionsarray')), true);
         $email = Auth::user()->email; // получаем адрес текущего авторизованного админа
@@ -560,9 +613,12 @@ class TodoController extends Controller
         ])->with('success', 'Изменения в сетку сеансов успешно добавлены');
     }
 
-
-
-    public function changeSaleStatus(Request $request) // ОТКРЫТЬ/ЗАКРЫТЬ ПРОДАЖУ БИЛЕТОВ
+    /**
+     * ОТКРЫТЬ/ЗАКРЫТЬ ПРОДАЖУ БИЛЕТОВ
+     *
+     * @param Request $request
+     */
+    public function changeSaleStatus(Request $request)
     {   
         $sale_status = (bool) $request->input('sale_status');
         $status_msge = "";

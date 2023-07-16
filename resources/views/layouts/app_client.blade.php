@@ -20,7 +20,7 @@
 
 <body>
     <header class="page-header">
-    <a href="{{route('client_main')}}" style="text-decoration: none"><h1 class="page-header__title">Идём<span>в</span>кино</h1></a>
+    <a href="{{ route('client_main') }}" style="text-decoration: none"><h1 class="page-header__title">Идём<span>в</span>кино</h1></a>
     </header>
   
     <nav class="page-nav">

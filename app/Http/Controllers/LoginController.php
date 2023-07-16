@@ -26,12 +26,12 @@ class LoginController extends Controller
         ]);
     }
 
-    public function login_get() {
+    public function loginGet() {
         if(Auth::check()) {
             return redirect(route('user.private'));
         }
         
-        return view('/auth/app_login');
+        return view('auth.app_login');
     }
 
     public function logout(Request $request) {
@@ -48,6 +48,6 @@ class LoginController extends Controller
 
     public function admin_login(){   // ВХОДА НА СТРАНИЦУ АДМИНИСТРИРОВАНИЯ
         
-        return view('/auth/app_login');
+        return view('auth.app_login');
     }
 }

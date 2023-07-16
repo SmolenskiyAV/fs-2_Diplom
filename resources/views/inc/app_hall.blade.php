@@ -13,7 +13,7 @@
 
 <body>
     <header class="page-header">
-    <a href="{{route('client_main')}}" style="text-decoration: none"><h1 class="page-header__title">Идём<span>в</span>кино</h1></a>
+    <a href="{{ route('client_main') }}" style="text-decoration: none"><h1 class="page-header__title">Идём<span>в</span>кино</h1></a>
     </header>
     @php
         if (empty($film_start)) $film_start = '';
@@ -43,8 +43,7 @@
         if (Schema::hasTable('halls_billing')) {
             $vip_cost = DB::table('halls_billing')->where('hall_name', $hall_name)->value('vip_cost');
             $usual_cost = DB::table('halls_billing')->where('hall_name', $hall_name)->value('usual_cost');
-        }
-        //dd($render_seats[0]->type);   
+        }        
     @endphp
         
     <main>

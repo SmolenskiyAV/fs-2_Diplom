@@ -11,27 +11,49 @@ use Illuminate\Support\Facades\DB;
 
 class ClientController extends Controller
 {
-    public $allTables;
-    public $sessionsPlanTables;     // список всех таблиц планов сеансов в БД
-    public $sessionsDayPlanTables;  // список всех таблиц сеансов в БД 
-    public $actualSessionsDays;
-    public $start_element;
-    public $current_size;
-    public $currentPlaneDate;
-    public $today;
-    public $start2_element;
-    public $actualFilms;
-    public $actualHalls;
+    /**
+     * Массив имён всех таблиц, созданных в текущей БД
+     *
+     * @var array
+     */
+    public array $allTables;
 
+    /**
+     * список всех таблиц планов сеансов в БД
+     *
+     * @var array
+     */
+    public array $sessionsPlanTables;
+
+    /**
+     * список всех таблиц сеансов в БД 
+     *
+     * @var array
+     */
+    public array $sessionsDayPlanTables;
+    public array $actualSessionsDays;
+    public int $start_element;
+    public int $current_size;
+    public string $currentPlaneDate;
+    public string $today;
+    public int $start2_element;
+    public array $actualFilms;
+    public array $actualHalls;
     
-    public function __construct(Request $request) {     // в конструкторе то, что отрабатывается при каждой загрузке app_client-шаблона
-        
+    /**
+     * в конструкторе то, что отрабатывается при каждой загрузке app_client-шаблона
+     *
+     * @param Request $request
+     * 
+     */
+    public function __construct(Request $request)
+    {        
         $this->allTables = DB::select("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;");
         $this->sessionsPlanTables = [];      
         $this->sessionsDayPlanTables = [];
         $this->actualSessionsDays = [];        
         
-        $this->start_element = $request->route()->parameter('start_element');
+        $this->start_element = (int)$request->route()->parameter('start_element');
         $sessions_date = $request->route()->parameter('sessions_date');
 
         if (empty($sessions_date)) {
@@ -91,7 +113,6 @@ class ClientController extends Controller
         }
         
         //============================================================================================
-
         
         foreach($this->sessionsDayPlanTables as $el) {
             if(str_contains($el, $this->currentPlaneDate)) {
@@ -113,15 +134,13 @@ class ClientController extends Controller
         }
     }
 
-
-
-
-
-
-    public function home()   // ГЛАВНАЯ СТРАНИЦА БРОНИРОВАНИЯ БИЛЕТОВ
+    /**
+     * ГЛАВНАЯ СТРАНИЦА БРОНИРОВАНИЯ БИЛЕТОВ
+     */
+    public function home()
     {          
         $hall_blocked = false;     // маркер
-        return view('/layouts/app_client', [
+        return view('layouts.app_client', [
             'dataHalls' => Hall::paginate(), 
             'dataFilms' => Film::paginate(), 
             'hall_blocked' => $hall_blocked, 
@@ -136,11 +155,13 @@ class ClientController extends Controller
         ]);
     }
 
-
-    public function client()   // ГЛАВНАЯ СТРАНИЦА БРОНИРОВАНИЯ БИЛЕТОВ (альтер маршрут)
+    /**
+     * ГЛАВНАЯ СТРАНИЦА БРОНИРОВАНИЯ БИЛЕТОВ (альтер маршрут)
+     */
+    public function client()
     {          
         $hall_blocked = false;     // маркер
-        return view('/layouts/app_client', [
+        return view('layouts.app_client', [
             'dataHalls' => Hall::paginate(), 
             'dataFilms' => Film::paginate(), 
             'hall_blocked' => $hall_blocked, 
@@ -156,11 +177,16 @@ class ClientController extends Controller
         ]);
     }
 
-
-    public function btnDatePush($sessions_date, $start_element)   // НАВИГАЦИЯ ПО КНОПКАМ ДАТЫ СЕАНСОВ
+    /**
+     * НАВИГАЦИЯ ПО КНОПКАМ ДАТЫ СЕАНСОВ
+     *
+     * @param mixed $sessions_date
+     * @param mixed $start_element
+     */
+    public function btnDatePush($sessions_date, $start_element)
     {          
         $hall_blocked = false;     // маркер
-        return view('/layouts/app_client', [
+        return view('layouts.app_client', [
             'dataHalls' => Hall::paginate(), 
             'sessions_date' => $sessions_date, 
             'dataFilms' => Film::paginate(), 
@@ -176,12 +202,20 @@ class ClientController extends Controller
             'today' => $this->today, 
             'start2_element' => $this->start2_element
         ]);
-    }
-    
+    }    
 
-    public function btnTimePush($film_start, $film_name, $hall_name, $film_date, $tickets_table)   // НАВИГАЦИЯ ПО КНОПКАМ ВРЕМЯ СЕАНСОВ
+    /**
+     * НАВИГАЦИЯ ПО КНОПКАМ ВРЕМЯ СЕАНСОВ
+     *
+     * @param mixed $film_start
+     * @param mixed $film_name
+     * @param mixed $hall_name
+     * @param mixed $film_date
+     * @param mixed $tickets_table
+     */
+    public function btnTimePush($film_start, $film_name, $hall_name, $film_date, $tickets_table)
     {           
-        return view('/inc/app_hall', [
+        return view('inc.app_hall', [
             'film_start' => $film_start, 
             'film_name' => $film_name, 
             'hall_name' => $hall_name, 
@@ -189,14 +223,20 @@ class ClientController extends Controller
             'tickets_table' => $tickets_table]);
     }
 
-
-    public function halls()   // ВЫБОР СЕАНСА (конкретные дата, время и зал)
+    /**
+     * ВЫБОР СЕАНСА (конкретные дата, время и зал)
+     */
+    public function halls()
     {           
-        return view('/inc/app_hall', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
+        return view('inc.app_hall', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
     }
 
-
-    public function chooseTickets(Request $request)   // ВЫБОР МЕСТ В ЗАЛЕ
+    /**
+     * ВЫБОР МЕСТ В ЗАЛЕ
+     *
+     * @param Request $request
+     */
+    public function chooseTickets(Request $request)
     {           
         $film_name = $request->input('film_name');
         $hall_name = $request->input('hall_name');
@@ -205,7 +245,7 @@ class ClientController extends Controller
         $total_cost = $request->input('total_cost');
         $arr = json_decode($request->input('arr'));
     
-    return view('/inc/app_payment', [
+    return view('inc.app_payment', [
         'choose_array' => $arr, 
         'film_name' => $film_name, 
         'hall_name' => $hall_name, 
@@ -214,20 +254,25 @@ class ClientController extends Controller
         'total_cost' => $total_cost]);
     }
 
-
     public function ticket() 
     {           
-        return view('/inc/app_ticket', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
+        return view('inc.app_ticket', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
     }
 
-
-    public function payment()   // ОПЛАТА БИЛЕТОВ (БРОНИРОВАНИЕ)
+    /**
+     * ОПЛАТА БИЛЕТОВ (БРОНИРОВАНИЕ)
+     */
+    public function payment()
     {           
-        return view('/inc/app_payment', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
+        return view('inc.app_payment', ['dataHalls' => Hall::paginate(), 'dataFilms' => Film::paginate()]);
     }
 
-
-    public function getTicketCode(Request $request)   // ГЕНЕРАЦИЯ КОДА БРОНИРОВАНИЯ БИЛЕТОВ
+    /**
+     * ГЕНЕРАЦИЯ КОДА БРОНИРОВАНИЯ БИЛЕТОВ
+     *
+     * @param Request $request
+     */
+    public function getTicketCode(Request $request)
     {
         $seats_list = $request->input('seats_list');
         $film_name = $request->input('film_name');
@@ -258,7 +303,7 @@ class ClientController extends Controller
                 ]); 
             }
 
-            return view('/inc/app_ticket', [
+            return view('inc.app_ticket', [
                 'seats_list' => $seats_list, 
                 'film_name' => $film_name, 
                 'hall_name' => $hall_name, 
@@ -268,7 +313,7 @@ class ClientController extends Controller
             
             $hall_blocked = true;     // маркер, при наличии к-го выводится сообщ о закрытой продаже билетов
 
-            return view('/layouts/app_client', [
+            return view('layouts.app_client', [
                 'dataHalls' => Hall::paginate(), 
                 'dataFilms' => Film::paginate(), 
                 'hall' => $hall_name, 

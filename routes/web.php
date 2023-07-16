@@ -8,7 +8,7 @@ use App\Http\Controllers\ClientController;
 
 // **************************** КЛИЕНТСКАЯ (пользовательская) ЧАСТЬ********************************************
 
-Route::post('/', [ClientController::class, 'home'])->name('home');  // МАРШРУТ ГЛАВНОЙ СТРАНИЦЫ БРОНИРОВАНИЯ
+Route::get('/', [ClientController::class, 'home'])->name('home');  // МАРШРУТ ГЛАВНОЙ СТРАНИЦЫ БРОНИРОВАНИЯ
 
 Route::get('/client', [ClientController::class, 'client'])->name('client_main');  // МАРШРУТ ГЛАВНОЙ СТРАНИЦЫ БРОНИРОВАНИЯ (алтернативный)
 
@@ -30,19 +30,19 @@ Route::post('/getTicketCode', [ClientController::class, 'getTicketCode'])->name(
 
 // ****************************** РЕГИСТРАЦИЯ АДМИНА *********************************************************
 
-route::name('user.')->group(function () {
+Route::name('user.')->group(function () {
    
-    route::view('/layouts/app_admin', '/layouts/app_admin')->middleware('auth')->name('private');
+    Route::get('/admin_main', [TodoController::class, 'showAdminMain'])->middleware('auth')->name('private');
 
-    Route::get('/auth/app_login', [\App\Http\Controllers\LoginController::class, 'login_get'])->name('login');
+    Route::get('/auth/app_login', [\App\Http\Controllers\LoginController::class, 'loginGet'])->name('login');
 
-    route::post('/auth/app_login', [\App\Http\Controllers\LoginController::class, 'login']);  
+    Route::post('/auth/app_login', [\App\Http\Controllers\LoginController::class, 'login']);  
 
-    route::post('/auth/register/changePass/{email}', [RegisterController::class, 'updatePassword'])->name('updatePassword');
+    Route::post('/auth/register/changePass/{email}', [RegisterController::class, 'updatePassword'])->name('updatePassword');
 
-    route::get('/auth/logout', [\App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
+    Route::get('/auth/logout', [\App\Http\Controllers\LoginController::class, 'logout'])->name('logout');
 
-    Route::get('/auth/app_register', [RegisterController::class, 'register_get'])->name('register');
+    Route::get('/auth/app_register', [RegisterController::class, 'registerGet'])->name('register');
 
     Route::post('/auth/app_register', [RegisterController::class, 'register']); 
 });
@@ -51,11 +51,11 @@ route::name('user.')->group(function () {
 
 // ********************************** АДМИНИСТРИРОВАНИЕ ЗАЛОВ и СЕТКИ СЕАНСОВ ********************************
 
-Route::get('/admin', [TodoController::class, 'admin_main'])->name('admin_main')->middleware('auth'); // маршрут СТРАНИЦЫ АДМИНИСТРИРОВАНИЯ
+Route::get('/admin', [TodoController::class, 'showAdminMain'])->name('admin_main')->middleware('auth'); // маршрут СТРАНИЦЫ АДМИНИСТРИРОВАНИЯ
 
 Route::get('/login', [\App\Http\Controllers\LoginController::class, 'admin_login'])->name('admin_login');    // МАРШРУТ ВХОДА НА СТРАНИЦУ АДМИНИСТРИРОВАНИЯ
 
-Route::get('/register', [RegisterController::class, 'admin_register'])->name('admin_register'); // МАРШРУТ РЕГИСТРАЦИИ администратора
+Route::get('/register', [RegisterController::class, 'adminRegister'])->name('admin_register'); // МАРШРУТ РЕГИСТРАЦИИ администратора
 
 Route::post('/addHall', [TodoController::class, 'addHall'])->name('addHall');
 Route::get('/delHall', [TodoController::class, 'delHall'])->name('delHall');

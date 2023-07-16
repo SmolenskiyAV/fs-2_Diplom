@@ -5,13 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class HallSessionsPlan extends Model    // МОДЕЛЬ таблицы "План сеансов на день" (для каждого зала на каждый день отдельная таблица)
+/**
+ * МОДЕЛЬ таблицы "План сеансов на день" (для каждого зала на каждый день отдельная таблица)
+ */
+class HallSessionsPlan extends Model
 {
     use HasFactory;
 
     private string $name;
     public $timestamps = true;
-
+    protected $fillable = ['film_name', 'film_tickets', 'film_start', 'film_stop', 'admin_updater'];
 			
 	public static function relation($sessions_date, $hall_name)
 	{
@@ -23,7 +26,10 @@ class HallSessionsPlan extends Model    // МОДЕЛЬ таблицы "План
         
 	}
 
-    // *** метод переприсваивания protected $table ***
+    /**
+     * Метод переприсваивания protected $table (нужен для привязки модели к динамически создаваемой таблице)
+     *
+     */
     protected $table = '';
 
     static $tableId = null;
@@ -41,9 +47,6 @@ class HallSessionsPlan extends Model    // МОДЕЛЬ таблицы "План
 
         static::$tableId = $tableId;
     }
-    // ***********************************************
-
-    protected $fillable = ['film_name', 'film_tickets', 'film_start', 'film_stop', 'admin_updater'];
 
     public function hall()  
     {

@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 
-class Hall extends Model    // МОДЕЛЬ таблицы "Залы"
+/**
+ * МОДЕЛЬ таблицы "Залы"
+ */
+class Hall extends Model
 {
     use HasFactory;
 
